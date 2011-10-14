@@ -1,0 +1,5 @@
+check process unicorn
+  with pidfile <%= "#{unicorn_pid}" %>
+  start program = "<%= "#{startup_script_path}" %> start"
+  stop program = "<%= "#{startup_script_path}" %> stop"
+  group unicorn
