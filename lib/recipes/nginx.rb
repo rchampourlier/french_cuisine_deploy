@@ -1,16 +1,16 @@
 Capistrano::Configuration.instance.load do
   
   # nginx _csetup
-  _cset :nginx_directory_path,  "/etc/nginx" unless exists?(:nginx_directory_path)
-  _cset :app_port, 80 unless exists?(:app_port)
-  _cset :app_uses_ssl, false unless exists?(:app_uses_ssl)
-  _cset :app_port_ssl, 443 unless exists?(:app_port_ssl)
+  _cset :host_confs_prefix,  "/etc/nginx"
+  _cset :app_port,          80
+  _cset :app_uses_ssl,      false
+  _cset :app_port_ssl,      443
   
   # The nginx template to be parsed by erb. You must copy this file to your app's vendor directory
   # (vendor/nginx_template.rb.erb). Capistrano will search it locally, so you don't need to track it
   # in git. However, it may be helpful to have in there so anybody can use it to deploy.
-  _cset :nginx_template,    "vendor/nginx_template.rb.erb"
-  _cset :nginx_host_config, "#{configs_path}/#{app_name}.tld"
+  _cset :nginx_template,    File.join(templates_path, "nginx_host_file.ltd.erb")
+  _cset :nginx_host_config, "#{config_path}/#{application}.tld"
   
   # Nginx tasks are not *nix agnostic, they assume you're using Debian/Ubuntu.
   # Override them as needed.
@@ -18,10 +18,10 @@ Capistrano::Configuration.instance.load do
     
     desc "Parses and uploads nginx configuration for this app"
     task :setup, :roles => :app , :except => { :no_release => true } do
-      _cset :nginx_domains, Capistrano::CLI.ui.ask("Enter #{application} domain names:") { |q| q.default = default_nginx_domains}
+      _aset :domain_names
       generate_config(nginx_template, nginx_host_config)
-      sudo "ln -s #{nginx_host_config} #{nginx_directory_path}/sites-available/"
-      sudo "ln -s #{nginx_host_config} #{nginx_directory_path}/sites-enabled/"
+      sudo "ln -sf #{nginx_host_config} #{host_confs_prefix}/sites-available/"
+      sudo "ln -sf #{nginx_host_config} #{host_confs_prefix}/sites-enabled/"
     end
   
     desc "Parses config file and outputs it to STDOUT (internal task)"

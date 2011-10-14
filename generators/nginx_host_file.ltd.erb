@@ -8,7 +8,7 @@ upstream <%= application %>_app_server {
 server {
     listen <%= app_port %>;
     client_max_body_size 500M;
-    server_name <%= nginx_domains %>;
+    server_name <%= domain_names %>;
 
     # ~2 seconds is often enough for most folks to parse HTML/CSS and
     # retrieve needed images/icons/frames, connections are cheap in
@@ -17,8 +17,8 @@ server {
 
     # path for static files
     root <%= deploy_to %>/current/public;
-    access_log <%= logs_path %>/nginx.access.log;
-    error_log  <%= logs_path %>/nginx.error.log;
+    access_log <%= log_path %>/nginx.access.log;
+    error_log  <%= log_path %>/nginx.error.log;
 
     # this rewrites all the requests to the maintenance.html
     # page if it exists in the doc root. This is for capistrano's
@@ -113,7 +113,7 @@ upstream <%= application %>_app_ssl {
 # you are using ssl as well as port 80.
 server {
   listen <%= app_port_ssl %>;
-  server_name <%= nginx_domains %>;
+  server_name <%= domain_names %>;
 
   ssl                     on;
   ssl_certificate         /etc/ssl/certs/server.crt;
