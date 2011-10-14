@@ -46,6 +46,10 @@ def environment
   end
 end
 
+def is_using_git
+  is_using('git', :scm)
+end
+
 def is_using_nginx
   is_using('nginx',:web_server)
 end

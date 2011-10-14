@@ -28,8 +28,8 @@ set :user,              'username'                                              
 set :group,             'groupname'                                                 # required
 set :deploy_to,         "/home/#{user}/rails/#{application}"
 
-set :domain_name,       'server'                                            # required
-
+set :domain_name,       'server'                                                    # required
+set :app_uses_ssl,      false                                                       # default: false
 
 role :app,              'server'
 role :web,              'server'
@@ -76,4 +76,4 @@ set :rvm_ruby_string,   "ruby-1.9.2-p290/#{application}"                        
 set :unicorn_workers,         2           # default: 4
 set :unicorn_workers_timeout, 30          # default: 30
 
-require 'capistrano/french_cuisine'
+require 'french_cuisine_deploy'

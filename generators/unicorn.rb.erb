@@ -22,8 +22,8 @@ user '<%= unicorn_user %>', '<%= unicorn_group %>'
 # "current" directory that Capistrano sets up.
 working_directory '<%= "#{deploy_to}/current" %>'
 
-stderr_path '<%= "#{logs_path}/unicorn.stderr.log" %>'
-stdout_path '<%= "#{logs_path}/unicorn.stdout.log" %>'
+stderr_path '<%= "#{log_path}/unicorn.stderr.log" %>'
+stdout_path '<%= "#{log_path}/unicorn.stdout.log" %>'
 
 preload_app true
 

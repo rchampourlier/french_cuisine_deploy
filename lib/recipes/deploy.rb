@@ -18,11 +18,6 @@ Capistrano::Configuration.instance.load do
       run commands.join(" && ")
     end
 
-    desc "|french_cuisine| Alias for symlinks:make"
-    task :symlink, :roles => :app, :except => { :no_release => true } do
-      symlinks.make
-    end
-
     desc "|french_cuisine| Remote run for rake db:seed"
     task :migrate, :roles => :app, :except => { :no_release => true } do
       run "cd #{current_path}; bundle exec rake RAILS_ENV=#{rails_env} db:seed"
@@ -32,6 +27,35 @@ Capistrano::Configuration.instance.load do
     task :cleanup, :roles => :app, :except => { :no_release => true } do
       #nothing to cleanup, we're not working with 'releases'
       puts "Nothing to cleanup, yay!"
+    end
+
+    # Invoked during initial deployment
+    desc "start"
+    task :start, :roles => :app, :except => {:no_release => true} do
+      unicorn.start
+      nginx.restart # reload seems not to be sufficient to get new host confs
+    end
+  
+    desc "stop"
+    task :stop, :roles => :app, :except => {:no_release => true} do
+      unicorn.stop
+    end
+    
+    desc "reload"
+    task :reload, :roles => :app, :except => {:no_release => true} do
+      unicorn.reload
+    end
+    
+    desc "graceful stop"
+    task :graceful_stop, :roles => :app, :except => {:no_release => true} do
+      unicorn.graceful_stop
+    end
+    
+    # Invoked after each deployment afterwards
+    desc "restart"
+    task :restart do
+      stop
+      start
     end
 
     namespace :rollback do

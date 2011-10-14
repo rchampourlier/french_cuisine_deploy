@@ -1,0 +1,11 @@
+# jeweler generated
+pkg
+
+# For MacOS:
+.DS_Store
+
+# For emacs:
+*~
+
+# bundler
+.bundle
