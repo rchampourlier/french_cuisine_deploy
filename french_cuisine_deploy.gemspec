@@ -15,6 +15,29 @@ Gem::Specification.new do |s|
   s.extra_rdoc_files = [
     "README.textile"
   ]
+  s.files = [
+    ".project",
+    ".rvmrc",
+    ".rvmrc.10.14.2011-12:10:24",
+    "README.textile",
+    "Rakefile",
+    "VERSION",
+    "example_deploy.rb",
+    "french_cuisine_deploy.gemspec",
+    "generators/monit_unicorn.conf.erb",
+    "generators/nginx_host_file.ltd.erb",
+    "generators/unicorn.rb.erb",
+    "generators/unicorn_startup_script.erb",
+    "lib/helpers.rb",
+    "lib/recipes/application.rb",
+    "lib/recipes/bundler.rb",
+    "lib/recipes/deploy.rb",
+    "lib/recipes/hooks.rb",
+    "lib/recipes/monit.rb",
+    "lib/recipes/nginx.rb",
+    "lib/recipes/unicorn.rb",
+    "pkg/french_cuisine_deploy-0.0.1.gem"
+  ]
   s.homepage = "http://github.com/rchampourlier/french_cuisine_deploy"
   s.require_paths = ["lib"]
   s.rubygems_version = "1.8.10"
