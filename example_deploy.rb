@@ -28,7 +28,7 @@ set :user,              'username'                                              
 set :group,             'groupname'                                                 # required
 set :deploy_to,         "/home/#{user}/rails/#{application}"
 
-set :domain_name,       'server'                                                    # required
+set :domain_names,      'server'                                                    # required
 set :app_uses_ssl,      false                                                       # default: false
 
 role :app,              'server'
@@ -64,7 +64,7 @@ set :host_confs_prefix, "/etc/nginx"                                            
 set :rails_env,         'production'                                                # default: 'production'
 
 set :using_rvm,         true          # possible values: [true, false]                default: true
-set :rvm_ruby_string,   "ruby-1.9.2-p290/#{application}"                            # required if using rvm
+set :rvm_ruby_string,   "ruby-1.9.2-p290@#{application}"                            # required if using rvm
 
 
 # APP SERVER CONFIGURATION

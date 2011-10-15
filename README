@@ -1,0 +1,97 @@
+=French Cuisine, Capistrano Recipes
+
+Capistrano recipes useful for deployment, including:
+
+* One-in-all deployment for a Rails app:
+** Supported configuration:
+*** Ubuntu 10.04 LTS server (may work on other servers, but adapted with this one in mind),
+*** served through a nginx proxy (standard distrib installation),
+*** PostgreSQL database (for now),
+*** monit process monitoring (may be disabled, only monitorer supported for now),
+*** Unicorn Rails application server (only one supported for now).
+** What does the script do:
+*** setup the app's directories (shared, config, log, sockets...),
+*** deploy the app with standard Capistrano recipe,
+*** integrates RVM and Bundler,
+*** setups Unicorn (generates an appropriate unicorn.rb file),
+*** setups Nginx (generates an appropriate host configuration file),
+*** setups Monit (generates an appropriate configuration file).
+
+==History
+
+This is just another set of Capistrano Recipes derived from the certainly excellent Weficient's one.
+Wanting to learn how to write Capistrano recipes from scratch, I did not fork nor copy the original
+recipes, rather made my own (starting in a single 'deploy.rb' file) to transform it to a gem to make
+it simpler to use, and to share.
+
+==Included Tasks
+
+TO BE UPDATED
+
+* cap nginx:setup
+* cap nginx:start
+* cap nginx:stop
+* cap nginx:restart
+* cap nginx:status
+* cap unicorn:start
+* cap unicorn:stop
+* cap unicorn:restart
+* cap unicorn:setup
+
+
+==Todo
+
+* If using RVM, should create the gemset if it does not exist, and even install the ruby if it is not
+yet installed.
+
+==Installation
+
+TO BE UPDATED
+
+Easy as pie...
+
+Install this gem:
+
+  sudo gem install ricodigo-capistrano-recipes
+
+To setup the initial Capistrano deploy file, go to your Rails app folder via command line and enter:
+
+  capify .
+
+==Configuration
+
+Inside the newly created config/deploy.rb, add:
+
+  require 'capistrano/ext/multistage' # only require if you've installed Cap ext gem
+
+  # This one should go at the end of your deploy.rb
+  require 'ricodigo_capistrano_recipes'
+
+===RVM
+
+RVM is enabled by default. You can disable it by setting :using_rvm to false, or leverage it
+by setting your rvm_ruby_string to appropriate ones (default is ree)
+
+If using_rvm is true, the rvm recipe will load rvm's own capistrano extensions so you don't
+have to worry about it during deploy. Just make sure you have everything set up right, like
+.rvmrc on project root and system-wide install on the servers.
+
+See (http://rvm.beginrescueend.com/rvm/install) for more info.
+
+===Nginx
+
+If you're using nginx as your web server, set :web_server to :nginx and deploy:setup will
+generate the appropriate configuration file for it based on your other variables, such as
+:application_uses_ssl, etc.
+
+===Unicorn
+
+If you're running Unicorn (http://unicorn.bogomips.org/) be sure to add this line instead:
+
+  set :server, :unicorn
+
+==Copyrights
+
+Original source: Copyright (c) 2009-2011 Webficient LLC, Phil Misiowiec. See LICENSE for details.
+Modified by: ricodigo (https://github.com/ricodigo)
+Our copyright: Copyright (c) 2011 softr.li, Romain Champourlier.
