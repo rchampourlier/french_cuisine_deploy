@@ -1,9 +1,9 @@
 Capistrano::Configuration.instance.load do
 
-# Unicorn setup
-
-# The wrapped bin to start unicorn. This is necessary because we're using rvm.
-  _cset :unicorn_binary,      "unicorn"
+  # Unicorn setup
+  
+  # The wrapped bin to start unicorn. This is necessary because we're using rvm.
+  _cset :unicorn_binary,      "unicorn_rails"
 
   _cset :unicorn_config,      "#{config_path}/unicorn.rb"
   _cset :unicorn_pid,         "#{pids_path}/unicorn.pid"      # Defines where the unicorn pid will live.
