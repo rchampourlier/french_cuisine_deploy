@@ -22,6 +22,7 @@ Capistrano::Configuration.instance.load do
       generate_config(nginx_template, nginx_host_config)
       sudo "ln -sf #{nginx_host_config} #{host_confs_prefix}/sites-available/"
       sudo "ln -sf #{nginx_host_config} #{host_confs_prefix}/sites-enabled/"
+      nginx.restart # reload seems not to be sufficient to get new host confs
     end
   
     desc "Parses config file and outputs it to STDOUT (internal task)"

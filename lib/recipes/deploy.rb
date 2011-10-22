@@ -14,7 +14,6 @@ Capistrano::Configuration.instance.load do
     desc "start"
     task :start, :roles => :app, :except => {:no_release => true} do
       unicorn.start
-      nginx.restart # reload seems not to be sufficient to get new host confs
     end
   
     desc "stop"
