@@ -44,7 +44,7 @@ case "$1" in
   echo -n "Restarting $DESC: "
         kill -QUIT `cat $PID`
   sleep 1
-  su - <%= "#{user}" %> -c $CMD
+  su - <%= "#{user}" %> -c "$CMD"
   echo "$NAME."
   ;;
   reload)
