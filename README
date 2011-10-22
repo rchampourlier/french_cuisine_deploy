@@ -43,6 +43,9 @@ TO BE UPDATED
 
 * If using RVM, should create the gemset if it does not exist, and even install the ruby if it is not
 yet installed.
+* Better management of monit. It should begin watching over the unicorn instance once it has been started
+by the script, or it may start it itself. It should stop watching when we want to stop the process too.
+* Tasks for log rotation.
 
 ==Installation
 
