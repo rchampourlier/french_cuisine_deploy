@@ -24,6 +24,11 @@ Wanting to learn how to write Capistrano recipes from scratch, I did not fork no
 recipes, rather made my own (starting in a single 'deploy.rb' file) to transform it to a gem to make
 it simpler to use, and to share.
 
+V0.0.6
+
+* Moved rvm_gemset namespace to rvm.
+* Added a task to trust the application's rvmrc file, hooked after deploy:update_code.
+
 ==Included Tasks
 
 TO BE UPDATED

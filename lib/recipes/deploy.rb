@@ -22,7 +22,7 @@ Capistrano::Configuration.instance.load do
     
     desc "|french_cuisine| Displays application deployment prerequisites"
     task :prerequisites do
-      rvm_gemset.prerequisites
+      rvm.prerequisites
       eval "#{database}.prerequisites"
     end
     

@@ -8,4 +8,8 @@ Capistrano::Configuration.instance.load do
     eval "#{web_server}.setup"
   end
   
+  after "deploy:update_code" do
+    "rvm:trust_rvmrc"
+  end
+  
 end

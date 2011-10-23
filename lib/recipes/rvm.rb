@@ -1,7 +1,7 @@
 Capistrano::Configuration.instance.load do
 
   # RVM gemset
-  namespace :rvm_gemset do
+  namespace :rvm do
     
     desc "Setups RVM gemset for new application"
     task :prerequisites, :roles => :app do
@@ -10,6 +10,10 @@ Capistrano::Configuration.instance.load do
       puts "### rvm gemset create #{(rvm_ruby_string.match(%r%^.*@%).post_match)}"
     end
     
+    desc 'Trust rvmrc file'
+    task :trust_rvmrc do
+      run "rvm rvmrc trust #{current_release}"
+    end
   end
   
 end
