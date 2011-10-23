@@ -29,6 +29,10 @@ V0.0.6
 * Moved rvm_gemset namespace to rvm.
 * Added a task to trust the application's rvmrc file, hooked after deploy:update_code.
 
+V0.0.7
+
+* Correct rvm.trust_rvmrc hook.
+
 ==Included Tasks
 
 TO BE UPDATED

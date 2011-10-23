@@ -9,7 +9,7 @@ Capistrano::Configuration.instance.load do
   end
   
   after "deploy:update_code" do
-    "rvm:trust_rvmrc"
+    rvm.trust_rvmrc
   end
   
 end
