@@ -9,11 +9,11 @@ Capistrano::Configuration.instance.load do
   _cset :unicorn_pid,         "#{pids_path}/unicorn.pid"      # Defines where the unicorn pid will live.
   _cset :unicorn_socket,      "#{sockets_path}/unicorn.sock"
 
-  _cset :unicorn_workers,     4 unless exists?(:unicorn_workers)
+  _cset :workers,             4 unless exists?(:workers)
 
   # Workers timeout in the amount of seconds below, when the master kills it and
   # forks another one.
-  _cset :unicorn_workers_timeout, 30 unless exists?(:unicorn_workers_timeout)
+  _cset :workers_timeout,     30 unless exists?(:workers_timeout)
 
   # Workers are started with this user/group
   # By default we get the user/group set in capistrano.
@@ -33,11 +33,13 @@ Capistrano::Configuration.instance.load do
   _cset :unicorn_startorder,              "21"
   _cset :unicorn_killorder,               "19"
 
-  # The monit config template for the unicorn process. Expected in /vendor/monit_unicorn.conf.erb
-  _cset :monit_unicorn_template,          File.join(templates_path, "monit_unicorn.conf.erb")
-  _cset :monit_conf_prefix,               "/etc/monit/conf.d"
-  _cset :monit_unicorn_conf_name,         "unicorn_#{application}.conf"
-  _cset :monit_unicorn_conf,              "#{monit_conf_prefix}/#{monit_unicorn_conf_name}"
+  if process_monitorer == :monit
+    # The monit config template for the unicorn process. Expected in /vendor/monit_unicorn.conf.erb
+    _cset :monit_unicorn_template,          File.join(templates_path, "monit_unicorn.conf.erb")
+    _cset :monit_conf_prefix,               "/etc/monit/conf.d"
+    _cset :monit_unicorn_conf_name,         "monit_unicorn_#{application}.conf"
+    _cset :monit_unicorn_conf,              "#{monit_conf_prefix}/#{monit_unicorn_conf_name}"
+  end
 
   # Unicorn deployment tasks
   namespace :unicorn do
@@ -79,11 +81,13 @@ Capistrano::Configuration.instance.load do
       # Position the script for loading at server's boot.
       sudo "update-rc.d #{startup_script_name} start #{unicorn_startorder} #{unicorn_runlevels} . stop #{unicorn_killorder} #{unicorn_stoplevels} ."
 
-      # Adds the monit config file for this process.
-      generate_config(monit_unicorn_template, "#{shared_path}/#{monit_unicorn_conf_name}")
-      sudo "mv #{shared_path}/#{monit_unicorn_conf_name} #{monit_unicorn_conf}"
-      sudo "chown root:root #{monit_unicorn_conf}"
-      sudo "chmod 0644 #{monit_unicorn_conf}"
+      if process_monitorer == :monit
+        # Adds the monit config file for this process.
+        generate_config(monit_unicorn_template, "#{shared_path}/#{monit_unicorn_conf_name}")
+        sudo "mv #{shared_path}/#{monit_unicorn_conf_name} #{monit_unicorn_conf}"
+        sudo "chown root:root #{monit_unicorn_conf}"
+        sudo "chmod 0644 #{monit_unicorn_conf}"
+      end
     end
   end
 

@@ -1,0 +1,17 @@
+--- 
+user: <%= thin_user %>
+group: <%= thin_group %>
+pid: <%= thin_pid %>
+timeout: <%= workers_timeout %>
+wait: 30
+log: <%= "#{log_path}/thin.log" %>
+max_conns: 1024
+require: []
+environment: production
+max_persistent_conns: 512
+servers: <%= workers %>
+threaded: true
+no-epoll: true
+daemonize: true
+socket: <%= thin_socket %>
+chdir: <%= current_path %>

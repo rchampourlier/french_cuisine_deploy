@@ -1,7 +1,15 @@
 # Some changes made on https://github.com/ricodigo/ricodigo-capistrano-recipes/blob/master/generators/nginx.conf.erb
 
 upstream <%= application %>_app_server {
+  <% if app_server == :unicorn %>
     server unix:<%= unicorn_socket %> fail_timeout=0;
+  <% end %>
+  <% if app_server == :thin %>
+    <% workers.times do |n| %>
+      <% socket = "#{thin_socket.match(%r%.*thin%).to_s}.#{n}#{thin_socket.match(%r%.*thin%).post_match}"%>
+      server unix:<%= socket %> fail_timeout=0;
+    <% end %>
+  <% end %>
 }
 
 # <%= application %> Server

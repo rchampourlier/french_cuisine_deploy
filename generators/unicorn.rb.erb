@@ -9,8 +9,8 @@ old_pid = '<%= unicorn_pid + ".old" %>'
 
 # Unicorn setup
 
-worker_processes <%= unicorn_workers %>
-timeout <%= unicorn_workers_timeout %>
+worker_processes <%= workers %>
+timeout <%= workers_timeout %>
 
 # Listen on a Unix data socket
 listen '<%= unicorn_socket %>', :backlog => 1024

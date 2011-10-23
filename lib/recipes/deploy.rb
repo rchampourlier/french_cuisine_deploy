@@ -5,34 +5,55 @@ Capistrano::Configuration.instance.load do
   set :shared_children, %w(system log pids config)
 
   namespace :deploy do
+    
+    desc "|french_cuisine| Interactive walkthrough for complete first deployment"
+    task :first do
+      
+      deploy.prerequisites
+      answer = Capistrano::CLI.ui.ask("Continue? (yes/no)") do |q|
+        q.default = "yes"
+        q.validate = %r%(yes|no)%
+      end
+      abort unless answer == "yes" 
+      
+      deploy.setup
+      deploy.cold
+    end
+    
+    desc "|french_cuisine| Displays application deployment prerequisites"
+    task :prerequisites do
+      rvm_gemset.prerequisites
+      eval "#{database}.prerequisites"
+    end
+    
     desc "|french_cuisine| Destroys everything"
     task :seppuku, :roles => :app, :except => { :no_release => true } do
       run "rm -rf #{current_path}; rm -rf #{shared_path}"
     end
 
     # Invoked during initial deployment
-    desc "start"
+    desc "|french_cuisine| Starts application server"
     task :start, :roles => :app, :except => {:no_release => true} do
-      unicorn.start
+      eval "#{app_server}.start"
     end
   
-    desc "stop"
+    desc "|french_cuisine| Stops application server"
     task :stop, :roles => :app, :except => {:no_release => true} do
-      unicorn.stop
+      eval "#{app_server}.stop"
     end
     
-    desc "reload"
+    desc "|french_cuisine| Reloads application server"
     task :reload, :roles => :app, :except => {:no_release => true} do
-      unicorn.reload
+      eval "#{app_server}.reload"
     end
     
-    desc "graceful stop"
+    desc "|french_cuisine| Gracefully stops application server"
     task :graceful_stop, :roles => :app, :except => {:no_release => true} do
-      unicorn.graceful_stop
+      eval "#{app_server}.graceful_stop"
     end
     
     # Invoked after each deployment afterwards
-    desc "restart"
+    desc "|french_cuisine| Restarts application server"
     task :restart do
       stop
       start

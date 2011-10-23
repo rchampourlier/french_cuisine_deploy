@@ -1,0 +1,59 @@
+#!/bin/bash
+#
+# <%= "#{application}" %>  <%= "#{application}" %> Rails application served through an Thin server
+#
+# Author                Romain Champourlier @ softr.li
+#
+# chkconfig: - <%= "#{thin_startorder} #{thin_killorder}" %>
+#
+# description:          This a web application developed in Ruby On Rails
+#                       which is served through an Unicorn instance.
+
+# processname: <%= thin_binary %>
+# config: <%= thin_config %>
+# pidfile: <%= thin_pid %>
+#
+
+### BEGIN INIT INFO
+# Provides:           <%= "#{application}" %>
+# Required-Start:     $local_fs $remote_fs $network $syslog
+# Required-Stop:      $local_fs $remote_fs $network $syslog
+# Default-Start:      <%= "#{thin_runlevels}" %>
+# Default-Stop:       <%= "#{thin_stoplevels}" %>
+# Short-Description:  starts <%= thin_binary %> for <%= "#{application}" %>
+# Description:        starts <%= thin_binary %> web server for <%= "#{application}" %> Rails app
+### END INIT INFO
+
+CMD='cd <%= "#{current_path}" %> && bundle exec <%= "#{thin_binary}" %> -C <%= "#{thin_config}" %>'
+NAME=<%= thin_binary %>
+DESC=<%= thin_binary %>
+PID=<%= "#{deploy_to}/shared/pids/thin.pid" %>
+
+case "$1" in
+  start)
+    echo -n "Starting $DESC: "
+    su - <%= "#{thin_user}" %> -c "$CMD start"
+    echo "$NAME."
+    ;;
+  stop)
+    echo -n "Stopping $DESC: "
+    su - <%= "#{thin_user}" %> -c "$CMD stop"
+    echo "$NAME."
+    ;;
+  restart)
+    echo -n "Restarting $DESC: "
+    su - <%= "#{thin_user}" %> -c "$CMD restart"
+    echo "$NAME."
+    ;;
+  reload)
+    echo -n "Reloading $DESC configuration: "
+    su - <%= "#{thin_user}" %> -c "$CMD restart"
+    echo "$NAME."
+    ;;
+  *)
+  echo "Usage: $NAME {start|stop|restart|reload}" >&2
+  exit 1
+  ;;
+esac
+
+exit 0

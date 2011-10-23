@@ -66,6 +66,7 @@ Capistrano::Configuration.instance.load do
   end
 
   namespace :app do
+    
     task :setup, :roles => :app do
       # Check shared dirs exist or create them.
       shared_dirs.each do |shared_dir|
@@ -73,5 +74,6 @@ Capistrano::Configuration.instance.load do
         run "mkdir -p #{shared_dir_path}"
       end
     end
+    
   end
 end

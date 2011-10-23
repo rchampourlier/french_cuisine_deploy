@@ -28,6 +28,17 @@ it simpler to use, and to share.
 
 TO BE UPDATED
 
+How to use:
+
+First deployment (cold):
+* cap deploy:prerequisites -> displays the manual operations to run before deploying the first time
+* cap deploy:setup
+* cap deploy:cold
+
+Next deployments:
+* cap deploy
+
+Other tasks:
 * cap nginx:setup
 * cap nginx:start
 * cap nginx:stop
@@ -46,6 +57,7 @@ yet installed.
 * Better management of monit. It should begin watching over the unicorn instance once it has been started
 by the script, or it may start it itself. It should stop watching when we want to stop the process too.
 * Tasks for log rotation.
+* Task to reset the application's gemset (nice when removed some gems).
 
 ==Installation
 
