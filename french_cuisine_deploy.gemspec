@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = "french_cuisine_deploy"
-  s.version = "0.0.7"
+  s.version = "0.0.8"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["romain@softr.li"]
-  s.date = "2011-10-23"
+  s.date = "2011-10-24"
   s.description = "Rails app deployment recipes for Capistrano"
   s.email = "romain@softr.li"
   s.extra_rdoc_files = [
