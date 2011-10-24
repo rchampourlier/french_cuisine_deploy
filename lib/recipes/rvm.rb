@@ -13,10 +13,9 @@ Capistrano::Configuration.instance.load do
     desc 'Set /etc/rvmrc parameter to trust all projects\' rvmrc files'
     task :setup do
       # If the file /etc/rvmrc contains rvm_trust_rvmrc_flag=0, replace it with rvm_trust_rvmrc_flag=1
-      run "sudo sed -e 's/rvm_trust_rvmrc_flag=0/rvm_trust_rvmrc_flag=1/g' /etc/rvmrc > /tmp/etc_rvmrc && sudo mv /tmp/etc_rvmrc /etc/rvmrc"
+      sudo %q(sed -e 's/rvm_trust_rvmrcs_flag=0/rvm_trust_rvmrcs_flag=1/g' /etc/rvmrc > /tmp/etc_rvmrc && sudo mv /tmp/etc_rvmrc /etc/rvmrc)
       # If the file does not contain rvm_trust_rvmrc_flag=, adds it.
-      sudo "! cat /etc/rvmrc | grep 'rvm_trust_rvmrc_flag=' && echo 'rvm_trust_rvmrc_flag=1' | sudo tee -a /etc/rvmrc"
-      # We have to trust both, if we want to use both when performing actions with Capistrano.
+      run %q(! cat /etc/rvmrc | grep 'rvm_trust_rvmrcs_flag=' && echo >> /etc/rvmrc && echo 'rvm_trust_rvmrcs_flag=1' >> /etc/rvmrc)
     end
   end
   
