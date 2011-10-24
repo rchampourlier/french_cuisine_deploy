@@ -13,7 +13,7 @@ Capistrano::Configuration.instance.load do
     desc 'Trust rvmrc file'
     task :trust_rvmrc do
       run "rvm rvmrc trust #{current_release}"
-      run "rvm rmcrc trust #{current_path}"
+      run "rvm rvmrc trust #{current_path}"
       # We have to trust both, if we want to use both when performing actions with Capistrano.
     end
   end

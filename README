@@ -24,17 +24,6 @@ Wanting to learn how to write Capistrano recipes from scratch, I did not fork no
 recipes, rather made my own (starting in a single 'deploy.rb' file) to transform it to a gem to make
 it simpler to use, and to share.
 
-V0.0.6
-* Moved rvm_gemset namespace to rvm.
-* Added a task to trust the application's rvmrc file, hooked after deploy:update_code.
-
-V0.0.7
-* Corrected rvm.trust_rvmrc hook.
-
-V0.0.8
-* rvm.trust_rvmrc task now trust the rvmrc for both the absolute release path, and the symlinked
-  current path. This is needed because we use the symlink in the startup script for the app server.
-
 ==Included Tasks
 
 TO BE UPDATED
@@ -42,24 +31,38 @@ TO BE UPDATED
 How to use:
 
 First deployment (cold):
-* cap deploy:prerequisites -> displays the manual operations to run before deploying the first time
-* cap deploy:setup
-* cap deploy:cold
+* cap deploy:first -> sugar syntax for running the following tasks:
+** cap deploy:prerequisites -> displays the manual operations to run before deploying the first time
+** cap deploy:setup
+** cap deploy:cold
 
 Next deployments:
 * cap deploy
 
 Other tasks:
+
+RVM:
+* cap rvm:prerequisites
+* cap rvm:trust_rvmrc
+
+Web server:
 * cap nginx:setup
 * cap nginx:start
 * cap nginx:stop
 * cap nginx:restart
-* cap nginx:status
+
+Application servers:
 * cap unicorn:start
 * cap unicorn:stop
 * cap unicorn:restart
 * cap unicorn:setup
+* cap thin:start
+* cap thin:stop
+* cap thin:restart
+* cap thin:setup
 
+Database:
+* cap postgresl:prerequisites
 
 ==Todo
 
