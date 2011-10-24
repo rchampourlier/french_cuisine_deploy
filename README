@@ -39,6 +39,10 @@ First deployment (cold):
 Next deployments:
 * cap deploy
 
+Tools:
+* cap taps:setup
+* cap taps:pull
+
 Other tasks:
 
 RVM:
