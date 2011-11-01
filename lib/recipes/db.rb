@@ -23,9 +23,6 @@ rescue LoadError
   exit
 end
 
-module FrenchCuisineDeploy
-end
-
 module FrenchCuisineDeploy::DB
   extend self
   
@@ -110,52 +107,22 @@ Capistrano::Configuration.instance.load do
   # Taps tools
   namespace :db do
     
-    # task :ooo do
-      # logger = Capistrano::Logger.new
-#       
-      # # Start SSH tunnelling
-      # logger.info "Starting SSH tunnelling"
-      # target_server = roles[:app].servers.first.to_s
-      # run_locally "ssh -f #{user}@#{target_server} -L 5000:127.0.0.1:5000 -N </dev/null >/dev/null 2>&1"
-#       
-      # sleep 5
-      # logger.info "SSH tunnel set up"
-#       
-      # if local_database == 'sqlite'
-        # local_database_url = "sqlite://#{local_database_name}"
-      # else
-        # abort
-      # end
-#       
-      # if database == :postgresql
-        # remote_database_url = "postgres://#{remote_database_user}:#{remote_database_password}@localhost/#{remote_database_name}"
-      # end
-# 
-      # options = {:current_path => current_path, :remote_database => remote_database_url, :local_database_url => local_database_url}
-# 
-      # FrenchCuisineDeploy::DB.run(:pull, self, options)
-    # end
-
-    
-    desc "Pulls the remote database to the local current environment's database"
-    task :pull, :roles => :app do
+    desc "Pull or push the remote database to the local current environment's database"
+    task :perform_sync, :roles => :app do
+      
+      _aset :sync_method, :pull
       
       logger = Capistrano::Logger.new
 
       # Setup SSH tunnel to carry the taps' connection data.
-      target_server = roles[:app].servers.first.to_s
-      ssh_command = "ssh -f #{user}@#{target_server} -L 5000:127.0.0.1:5000 -N"
-      run_locally "#{ssh_command} </dev/null >/dev/null 2>&1" # these keys ensure the process does return
-      
-      # This may be another way, but not working as is.
-      # Setup port forwarding to access the taps server on the remote server
-      # (unreachable directly - 5000 is closed to the outside world).
-      #Net::SSH.start( target_server, user ) do |session|
-        #session.forward.local( 5000, '127.0.0.1', 5000 )
-        #session.loop
-      #end
+      set :ssh_target_server, roles[:app].servers.first.to_s
+      set :ssh_local_port, 5000
+      set :ssh_target_port, 5000
+      ssh.open_tunnel
       
       # Start taps on the app server
+      
+      # TODO replace with autodetection of databases through database.yml file
       
       # Local database
       _aset :local_database, 'sqlite'
@@ -182,37 +149,37 @@ Capistrano::Configuration.instance.load do
         logger.important "#{local_database} databases not supported yet."
       end
       
-      #logger.important remote_database_url
-      logger.important local_database_url
-      
-      # TODO display which environment is touched locally.
-      answer = Capistrano::CLI.ui.ask("Are you sure? This will replace your local database (#{local_database_name}) by the remote one. (yes/no)") do |q|
-        q.default = "no"
-        q.validate = %r%(yes|no)%
-      end
-      abort unless answer == "yes"
-
       # Run the taps operation:
       #  1. starts taps server
       #  2. perform the pull operation
       #  3. closes the channel, thus stopping the taps server
       options = {:current_path => current_path, :remote_database => remote_database_url, :local_database_url => local_database_url}
-      FrenchCuisineDeploy::DB.run(:pull, self, options)
+      FrenchCuisineDeploy::DB.run(sync_method.to_sym, self, options)
       
-      # Close the SSH tunnel
-      run_locally "kill `ps auxww|grep '#{ssh_command}' | grep -v grep | awk '{print $2}'`"
+      ssh.close_tunnel
     end
     
-    desc "Pushes the current environment's database to the remote production database"
-    task :push do
-      answer = Capistrano::CLI.ui.ask("Are you sure? This will delete your remote database (yes/no)") do |q|
+    task :pull do
+      answer = Capistrano::CLI.ui.ask("Are you sure? This will replace your local database (#{local_database_name}) by the remote one. (yes/no)") do |q|
         q.default = "no"
         q.validate = %r%(yes|no)%
       end
       abort unless answer == "yes"
       
-      # Setup a SSH tunnel to access taps default port on server (5000)
-      # Run taps locally to push the local db to the remote db
+      set :sync_method, :pull
+      db.perform_sync
+    end
+    
+    desc "Pushes the current environment's database to the remote production database"
+    task :push do
+      answer = Capistrano::CLI.ui.ask("Are you sure? This will replace your remote database by the local one (#{local_database_name}) (yes/no)") do |q|
+        q.default = "no"
+        q.validate = %r%(yes|no)%
+      end
+      abort unless answer == "yes"
+      
+      set :sync_method, :push
+      db.perform_sync
     end
   end
   

@@ -39,15 +39,10 @@ First deployment (cold):
 Next deployments:
 * cap deploy
 
-Tools:
-* cap taps:setup
-* cap taps:pull
-
 Other tasks:
 
 RVM:
 * cap rvm:prerequisites
-* cap rvm:trust_rvmrc
 
 Web server:
 * cap nginx:setup
@@ -66,7 +61,17 @@ Application servers:
 * cap thin:setup
 
 Database:
-* cap postgresl:prerequisites
+* Database servers setup:
+** cap postgresl:prerequisites
+* Database synchronization:
+These tasks enable you to synchronize your remote database with your local development one (for example).
+(Requires the 'taps' gem to be installed on both workstation and server.)
+** cap db:pull
+** cap db:push
+
+SSH:
+* cap ssh:open_tunnel
+* cap ssh:close_tunnel
 
 ==Todo
 
