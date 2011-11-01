@@ -49,6 +49,8 @@ Web server:
 * cap nginx:start
 * cap nginx:stop
 * cap nginx:restart
+* cap nginx:setup_clean: remove nginx setup files
+* cap nginx:setup_recreate: clean then setup
 
 Application servers:
 * cap unicorn:start
@@ -72,6 +74,13 @@ These tasks enable you to synchronize your remote database with your local devel
 SSH:
 * cap ssh:open_tunnel
 * cap ssh:close_tunnel
+
+==Use cases
+
+* Changing your application server from :unicorn to :thin:
+** change it in your 'deploy.rb' file
+** run app.update_server
+
 
 ==Todo
 

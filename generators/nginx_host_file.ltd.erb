@@ -114,7 +114,15 @@ server {
 <% if app_uses_ssl %>
 
 upstream <%= application %>_app_ssl {
-  server unix:<%= unicorn_socket %> fail_timeout=0;
+  <% if app_server == :unicorn %>
+    server unix://<%= unicorn_socket %> fail_timeout=0;
+  <% end %>
+  <% if app_server == :thin %>
+    <% workers.times do |n| %>
+      <% socket = "#{thin_socket.match(%r%.*thin%).to_s}.#{n}#{thin_socket.match(%r%.*thin%).post_match}"%>
+      server unix:<%= socket %> fail_timeout=0;
+    <% end %>
+  <% end %>
 }
 
 # This server is setup for ssl. Uncomment if

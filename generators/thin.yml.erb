@@ -4,7 +4,7 @@ group: <%= thin_group %>
 pid: <%= thin_pid %>
 timeout: <%= workers_timeout %>
 wait: 30
-log: <%= "#{log_path}/thin.log" %>
+log: <%= thin_log %>
 max_conns: 1024
 require: []
 environment: production

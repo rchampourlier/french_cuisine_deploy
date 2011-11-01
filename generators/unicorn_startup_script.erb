@@ -27,7 +27,7 @@
 CMD='cd <%= "#{current_path}" %> && bundle exec <%= "#{unicorn_binary}" %> -c <%= "#{unicorn_config}" %> -E <%= "#{rails_env}" %> -D'
 NAME=unicorn_rails
 DESC=unicorn_rails
-PID=<%= "#{deploy_to}/shared/pids/unicorn.pid" %>
+PID=<%= "#{unicorn_pid}" %>
 
 case "$1" in
   start)

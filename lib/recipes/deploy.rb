@@ -34,12 +34,12 @@ Capistrano::Configuration.instance.load do
     # Invoked during initial deployment
     desc "|french_cuisine| Starts application server"
     task :start, :roles => :app, :except => {:no_release => true} do
-      eval "#{app_server}.start"
+      app.start
     end
   
     desc "|french_cuisine| Stops application server"
     task :stop, :roles => :app, :except => {:no_release => true} do
-      eval "#{app_server}.stop"
+      app.stop
     end
     
     desc "|french_cuisine| Reloads application server"

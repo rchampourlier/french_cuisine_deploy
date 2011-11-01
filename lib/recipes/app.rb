@@ -1,6 +1,14 @@
 # Code from https://github.com/ricodigo/ricodigo-capistrano-recipes/blob/master/lib/recipes/application.rb
 # Modified by romain@softr.li
 
+module FrenchCuisineDeploy
+  class App
+    def self.supported_servers
+      [:unicorn, :thin] 
+    end
+  end
+end
+
 Capistrano::Configuration.instance.load do
   
   # User settings
@@ -8,6 +16,9 @@ Capistrano::Configuration.instance.load do
   _aset :group
   _aset :password
   _cset :use_sudo, false
+
+  # System settings
+  _cset :startup_script_prefix, '/etc/init.d'
 
   # Server settings
   _cset :app_server, :unicorn
@@ -53,7 +64,6 @@ Capistrano::Configuration.instance.load do
     _aset :rvm_ruby_string
   end
 
-
   # Options necessary to make Ubuntu’s SSH happy
   ssh_options[:paranoid]    = false
   default_run_options[:pty] = true
@@ -67,12 +77,54 @@ Capistrano::Configuration.instance.load do
 
   namespace :app do
     
-    task :setup, :roles => :app do
+    task :setup_shared_dirs, :roles => :app do
       # Check shared dirs exist or create them.
       shared_dirs.each do |shared_dir|
         shared_dir_path = eval "#{shared_dir}_path"
         run "mkdir -p #{shared_dir_path}"
       end
+    end
+    
+    task :setup_app_server, :roles => :app do
+      eval "#{web_server}.setup"
+      eval "#{app_server}.setup"
+      eval "#{web_server}.restart" # reload seems not to be sufficient to get new host confs 
+    end
+    
+    task :clean_app_server_setup, :roles => :app do
+      eval "#{web_server}.setup_clean"
+      eval "#{app_server}.setup_clean"
+      eval "#{web_server}.restart" # reload seems not to be sufficient to get new host confs 
+    end
+    
+    task :change_server, :roles => :app do
+      possible_servers = FrenchCuisineDeploy::App.supported_servers - [app_server]
+      prompt = "Which application server is currently running? (#{possible_servers.join ", "})"
+      server = Capistrano::CLI.ui.ask(prompt) do |q|
+        q.validate = %r%(#{possible_servers.join("|")})%
+      end
+      logger = Capistrano::Logger.new
+      logger.important "Changing app server from #{server} to #{app_server}"
+      
+      current_server = app_server
+      
+      # Temporary change app_server to old one to perform the cleaning operations
+      set :app_server, server.to_sym
+      clean_app_server_setup
+      stop
+      
+      # Restore the current app_server, do the setup and start it.
+      set :app_server, current_server
+      setup_app_server
+      start
+    end
+    
+    task :start, :roles => :app do
+      eval "#{app_server}.start"
+    end
+    
+    task :stop, :roles => :app do
+      eval "#{app_server}.stop"
     end
     
   end

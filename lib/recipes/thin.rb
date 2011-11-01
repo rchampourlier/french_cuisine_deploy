@@ -8,12 +8,13 @@ Capistrano::Configuration.instance.load do
   _cset :thin_config,         "#{config_path}/thin.yml"
   _cset :thin_pid,            "#{pids_path}/thin.pid"      # Defines where the thin pid will live.
   _cset :thin_socket,         "#{sockets_path}/thin.sock"
-
-  _cset :workers,             4
+  _cset :thin_log,            "#{log_path}/thin.log"
+  
+  _cset :thin_workers,            workers
 
   # Workers timeout in the amount of seconds below, when the master kills it and
   # forks another one.
-  _cset :workers_timeout,     30
+  _cset :thin_workers_timeout,     workers_timeout
 
   # Workers are started with this user/group
   # By default we get the user/group set in capistrano.
@@ -25,7 +26,6 @@ Capistrano::Configuration.instance.load do
   # in git. However, it may be helpful to have in there so anybody can use it to deploy.
   _cset :thin_conf_template,              File.join(templates_path, "thin.yml.erb")
   _cset :thin_startup_script_template,    File.join(templates_path, "thin_startup_script.erb")
-  _cset :startup_script_prefix,           "/etc/init.d"
   _cset :thin_startup_script_name,        "thin_#{application}"
   _cset :thin_startup_script_path,        "#{startup_script_prefix}/#{thin_startup_script_name}"
   _cset :thin_runlevels,                  "2 3 4 5"
@@ -35,27 +35,28 @@ Capistrano::Configuration.instance.load do
 
   if process_monitorer == :monit
     # The monit config template for the thin process. Expected in /vendor/monit_thin.conf.erb
-    _cset :monit_thin_template,          File.join(templates_path, "monit_thin.conf.erb")
-    _cset :monit_conf_prefix,               "/etc/monit/conf.d"
-    _cset :monit_thin_conf_name,         "monit_thin_#{application}.conf"
-    _cset :monit_thin_conf,              "#{monit_conf_prefix}/#{monit_thin_conf_name}"
+    _cset :thin_monit_template,          File.join(templates_path, "monit_thin.conf.erb")
+    _cset :thin_monit_conf_name,         "monit_thin_#{application}.conf"
+    _cset :thin_monit_conf,              "#{monit_conf_prefix}/#{thin_monit_conf_name}"
   end
 
   # Thin deployment tasks
   namespace :thin do
     desc "Starts thin through service"
     task :start, :roles => :app do
-      sudo "service #{thin_startup_script_name} start"
+      #sudo "service #{thin_startup_script_name} start"
+      run "cd #{current_path} && bundle exec #{thin_binary} -C #{thin_config} start"
     end
 
     desc "Stops thin directly"
     task :stop, :roles => :app do
-     sudo "service #{thin_startup_script_name} stop"
+     #sudo "service #{thin_startup_script_name} stop"
+     run "cd #{current_path} && bundle exec #{thin_binary} -C #{thin_config} stop"
     end
 
     desc "Restarts thin directly"
     task :restart, :roles => :app do
-      sudo "service #{thin_startup_script_name} restart"
+      run "cd #{current_path} && bundle exec #{thin_binary} -C #{thin_config} restart"
     end
 
     desc <<-EOF
@@ -78,12 +79,32 @@ Capistrano::Configuration.instance.load do
 
       if process_monitorer == :monit
         # Adds the monit config file for this process.
-        generate_config(monit_thin_template, "#{shared_path}/#{monit_thin_conf_name}")
-        sudo "mv #{shared_path}/#{monit_thin_conf_name} #{monit_thin_conf}"
-        sudo "chown root:root #{monit_thin_conf}"
-        sudo "chmod 0644 #{monit_thin_conf}"
+        generate_config(monit_thin_template, "#{shared_path}/#{thin_monit_conf_name}")
+        sudo "mv #{shared_path}/#{thin_monit_conf_name} #{thin_monit_conf}"
+        sudo "chown root:root #{thin_monit_conf}"
+        sudo "chmod 0644 #{thin_monit_conf}"
       end
-    end
+    end # task :setup
+    
+    
+    desc <<-EOF
+    Clean the setup files: config, startup script, process monitorer conf file.
+    EOF
+    task :setup_clean, :roles => :app do
+      
+      # Remove the startup script
+      sudo "rm #{thin_startup_script_path}"
+      
+      # Un-position from startup services
+      sudo "update-rc.d #{thin_startup_script_name} remove"
+      
+      if process_monitorer == :monit
+        # Remove the monit conf file if needed
+        sudo "rm #{thin_monit_conf_path}"
+      end
+      
+    end # task :setup_clean
+    
   end
 
 end

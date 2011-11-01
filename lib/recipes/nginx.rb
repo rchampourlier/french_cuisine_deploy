@@ -1,3 +1,11 @@
+# TASKS
+# nginx.setup
+# nginx.setup_clean
+# nginx.reload
+# nginx.restart
+# nginx.start
+# nginx.stop
+# nginx.status
 Capistrano::Configuration.instance.load do
   
   # nginx _csetup
@@ -9,8 +17,9 @@ Capistrano::Configuration.instance.load do
   # The nginx template to be parsed by erb. You must copy this file to your app's vendor directory
   # (vendor/nginx_template.rb.erb). Capistrano will search it locally, so you don't need to track it
   # in git. However, it may be helpful to have in there so anybody can use it to deploy.
-  _cset :nginx_template,    File.join(templates_path, "nginx_host_file.ltd.erb")
-  _cset :nginx_host_config, "#{config_path}/#{application}.tld"
+  _cset :nginx_template,          File.join(templates_path, "nginx_host_file.ltd.erb")
+  _cset :nginx_host_config_name,  "#{application}.tld"
+  _cset :nginx_host_config,       "#{config_path}/#{nginx_host_config_name}"
   
   # Nginx tasks are not *nix agnostic, they assume you're using Debian/Ubuntu.
   # Override them as needed.
@@ -22,12 +31,13 @@ Capistrano::Configuration.instance.load do
       generate_config(nginx_template, nginx_host_config)
       sudo "ln -sf #{nginx_host_config} #{host_confs_prefix}/sites-available/"
       sudo "ln -sf #{nginx_host_config} #{host_confs_prefix}/sites-enabled/"
-      nginx.restart # reload seems not to be sufficient to get new host confs
     end
-  
-    desc "Parses config file and outputs it to STDOUT (internal task)"
-    task :parse, :roles => :web , :except => { :no_release => true } do
-      puts parse_config(nginx_template)
+    
+    desc "Remove the nginx configuration file for this app"
+    task :setup_clean, :roles => :web do
+      sudo "rm -f #{host_confs_prefix}/sites-available/#{nginx_host_config_name}"
+      sudo "rm -f #{host_confs_prefix}/sites-enabled/#{nginx_host_config_name}"
+      run "rm -f #{nginx_host_config}"
     end
   
     desc "Reload nginx. Send the HUP signal to have nginx reload its configuration"
