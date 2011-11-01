@@ -1,6 +1,7 @@
 V0.0.10
 * added db recipes (db:pull and db:push tasks for db synchronization using 'taps')
-* added ssh receipe (open/close SSH tunnel)
+* added ssh recipes (open/close SSH tunnel)
+* added app:change_server task performing the operations required when changing the Rails' app server
 
 V0.0.9
 * moved rvm.trust_rvmrc task to french_cuisine_bootstrap since it only have to be done once
