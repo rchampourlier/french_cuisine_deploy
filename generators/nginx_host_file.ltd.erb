@@ -30,7 +30,7 @@ server {
 
     location / {
       
-      if (-f $document_root/maintenance.html) {
+      if (-f <%= maintenance_page_path %>) {
         return 503;
       }
       
@@ -110,8 +110,8 @@ server {
     # Maintenance error page
     error_page 503 @maintenance;
     location @maintenance {
-      rewrite ^(.*)$ <%= maintenance_page_path %> last;
-      break;
+      root /home/deployer/rails/redmine/shared/system;
+      rewrite ^(.*)$ /maintenance.html break;
     }
 }
 
@@ -148,12 +148,16 @@ server {
   # this rewrites all the requests to the maintenance.html
   # page if it exists in the doc root. This is for capistrano's
   # disable web task
-  if (-f $document_root/system/maintenance.html) {
-    rewrite  ^(.*)$  /system/maintenance.html last;
-    break;
+  if (-f <%= maintenance_page_path %>) {
+    rewrite  ^(.*)$  /maintenance.html break;
   }
 
   location / {
+    
+    if (-f <%= maintenance_page_path %>) {
+      return 503;
+    }
+      
     # needed to forward user's IP address to rails
     proxy_set_header  X-Real-IP  $remote_addr;
 
@@ -197,9 +201,16 @@ server {
     }
   }
 
-  error_page   500 502 503 504  /500.html;
+  error_page   500 502 504  /500.html;
   location = /500.html {
     root   <%= deploy_to %>/current/public;
+  }
+   
+  # Maintenance error page
+  error_page 503 @maintenance;
+  location @maintenance {
+    root /home/deployer/rails/redmine/shared/system;
+    rewrite ^(.*)$ /maintenance.html break;
   }
 }
 <% end %>
