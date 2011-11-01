@@ -70,11 +70,11 @@ Capistrano::Configuration.instance.load do
   
   # Shared paths
   _cset :shared_path,           File.join(deploy_to, "shared")
-  _cset :shared_dirs,           %w(config log pids sockets)
+  _cset :shared_dirs,           %w(config log pids sockets system)
   shared_dirs.each do |shared_dir|
     eval "_cset :#{shared_dir}_path, File.join(shared_path, '#{shared_dir}')"
   end
-
+  
   namespace :app do
     
     task :setup_shared_dirs, :roles => :app do
