@@ -1,3 +1,7 @@
+V0.0.9
+* moved rvm.trust_rvmrc task to french_cuisine_bootstrap since it only have to be done once
+  for all the projects deployed on a server.
+
 V0.0.8
 * rvm.trust_rvmrc task now trust the rvmrc for both the absolute release path, and the symlinked
   current path. This is needed because we use the symlink in the startup script for the app server.

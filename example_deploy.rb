@@ -50,7 +50,7 @@ set :app_server,        :unicorn      # possible values: [:unicorn, :thin]      
 set :database,          :postgresql   # possible values: [:postgresql]                default: :postgresql
 set :process_monitorer, :monit        # possible values: [:none, :monit]              default: :none
 
-set :sockets_path,      File.join(shared_path, "sockets", "#{application}.sock")    # default: File.join(shared_path, "sockets", "#{application}.sock")
+set :sockets_path,      File.join(shared_path, "sockets")                           # default: File.join(shared_path, "sockets")
 set :pids_path,         File.join(shared_path, "pids")                              # default: File.join(shared_path, "pids")
 
 

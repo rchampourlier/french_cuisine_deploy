@@ -1,19 +1,21 @@
 # This ask the user to set the value if not already set. This can be used
 # for values which can't be set to defaults. If the user does not provide
 # a value, the rake task is to be stopped.
-def _aset(name)
+def _aset(name, *default_value)
   unless exists?(name)
-    ui.say("Requesting a value for: #{name}. Enter here or set in your deploy.rb file.")
-    prompt = "Enter value (return will abort): "
-    value = ui.ask(prompt)
-    if value.blank?
+    Capistrano::CLI.ui.say("Need a value for '#{name}'. (You can set this value in your deploy.rb file.)")
+    prompt = default_value.empty? ? "Enter value (return will abort): " : "Enter value:"
+    value = Capistrano::CLI.ui.ask(prompt) do |q|
+      q.default = default_value.first unless default_value.empty?
+    end
+    if value.length == 0
       exit
     else
       set(name, value)
     end 
   end
 end
-  
+    
 
 # Code by Tim Riley
 # https://github.com/timriley/capistrano-mycorp/blob/master/lib/mycorp/common.rb
