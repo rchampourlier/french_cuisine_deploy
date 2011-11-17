@@ -50,6 +50,11 @@ module FrenchCuisineDeploy::DB
     "cd #{current_path} && bundle exec taps server #{database} tmpuser tmppass"
   end
   
+  def server_kill_command(options={})
+    database = options[:remote_database]
+    "kill `ps auxww|grep 'taps server #{database}' | grep -v grep | awk '{print $2}'`"
+  end
+  
   # The meat of the operation. Runs operations after setting up the Taps server.
   # 
   # 1. Runs the <tt>taps</tt> taps command to start the Taps server (assuming Sinatra is running on Thin)
@@ -98,6 +103,9 @@ module FrenchCuisineDeploy::DB
         channel[:status] = 0
       end
     end
+    
+    # Closing the channel seems not to stop the remote taps server, so we'll kill it.
+    instance.run FrenchCuisineDeploy::DB.server_kill_command(options)
   end
   
 end
