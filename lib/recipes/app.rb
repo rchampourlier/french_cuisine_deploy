@@ -88,7 +88,7 @@ Capistrano::Configuration.instance.load do
     task :setup_app_server, :roles => :app do
       eval "#{web_server}.setup"
       eval "#{app_server}.setup"
-      eval "#{web_server}.restart" # reload seems not to be sufficient to get new host confs 
+      eval "#{web_server}.reload" # reload seems not to be sufficient to get new host confs 
     end
     
     task :clean_app_server_setup, :roles => :app do
