@@ -110,7 +110,7 @@ server {
     # Maintenance error page
     error_page 503 @maintenance;
     location @maintenance {
-      root /home/deployer/rails/redmine/shared/system;
+      root <%= deploy_to %>/shared/system;
       rewrite ^(.*)$ /maintenance.html break;
     }
 }
@@ -209,7 +209,7 @@ server {
   # Maintenance error page
   error_page 503 @maintenance;
   location @maintenance {
-    root /home/deployer/rails/redmine/shared/system;
+    root <%= deploy_to %>/shared/system;
     rewrite ^(.*)$ /maintenance.html break;
   }
 }
