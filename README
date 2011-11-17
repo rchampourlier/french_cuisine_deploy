@@ -78,8 +78,10 @@ SSH:
 ==Use cases
 
 * Changing your application server from :unicorn to :thin:
-** change it in your 'deploy.rb' file
-** run app.update_server
+** change the 'app_server' value in your 'deploy.rb' file
+** run 'cap maintenance:on'
+** run 'cap app:change_server'
+** run 'cap maintenance:off'
 
 
 ==Todo
