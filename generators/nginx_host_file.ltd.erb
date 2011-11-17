@@ -92,7 +92,7 @@ server {
        break;
     }
 
-    # if the request is for a static resource, nginx should serve it directly
+    # If the request is for a static resource, nginx should serve it directly
     # and add a far future expires header to it, making the browser
     # cache the resource and navigate faster over the website
     location ~ ^/(images|javascripts|stylesheets|system)/ {
@@ -100,6 +100,9 @@ server {
       expires max;
       break;
     }
+    
+    # Project's additional locations
+    <%= nginx_host_file_additional_location %>
 
     # Rails error pages
     error_page 500 502 504 /500.html;

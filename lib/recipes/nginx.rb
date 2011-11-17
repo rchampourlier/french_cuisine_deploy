@@ -21,6 +21,9 @@ Capistrano::Configuration.instance.load do
   _cset :nginx_host_config_name,  "#{application}.tld"
   _cset :nginx_host_config,       "#{config_path}/#{nginx_host_config_name}"
   
+  # Defaults the nginx_host_file_additional_location to an empty string.
+  _cset :nginx_host_file_additional_location, ''
+  
   # Nginx tasks are not *nix agnostic, they assume you're using Debian/Ubuntu.
   # Override them as needed.
   namespace :nginx do
