@@ -55,6 +55,7 @@ Capistrano::Configuration.instance.load do
     desc "Restarts unicorn directly"
     task :restart, :roles => :app do
       run "#{try_sudo} kill -s USR2 `cat #{unicorn_pid}`"
+      start
     end
 
     desc "Gracefully stops unicorn directly"
