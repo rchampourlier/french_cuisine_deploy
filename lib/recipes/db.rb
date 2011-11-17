@@ -87,10 +87,10 @@ module FrenchCuisineDeploy::DB
     data_so_far = ""
     instance.run FrenchCuisineDeploy::DB.server_command(options) do |channel, stream, data|
       data_so_far << data
-      logger.trace data_so_far
-      if data_so_far.include? "WEBrick::HTTPServer#start"
+      logger.important data_so_far
+      if data_so_far.include? ">> Listening on 0.0.0.0:5000, CTRL+C to stop"
         remote_url = FrenchCuisineDeploy::DB.taps_remote_url
-  
+        sleep 5
         FrenchCuisineDeploy::DB.taps_client_transfer(method, local_database_url, remote_url)
   
         data_so_far = ""
