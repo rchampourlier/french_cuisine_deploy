@@ -127,5 +127,9 @@ Capistrano::Configuration.instance.load do
       eval "#{app_server}.stop"
     end
     
+    task :restart, :roles => :app do
+      eval "#{app_server}.restart"
+    end
+    
   end
 end
