@@ -1,3 +1,8 @@
+V0.0.11
+* Added maintenance:on, maintenance:off tasks that upload/delete a file to the remote server
+  to display a maintenance page with a 503 response. (Similar to Heroku's)
+* Many corrections (nginx virtual host file, db tasks for database syncing).
+
 V0.0.10
 * added db recipes (db:pull and db:push tasks for db synchronization using 'taps')
 * added ssh recipes (open/close SSH tunnel)
