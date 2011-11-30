@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = "french_cuisine_deploy"
-  s.version = "0.0.10"
+  s.version = "0.0.11"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["romain@softr.li"]
-  s.date = "2011-11-01"
+  s.date = "2011-11-30"
   s.description = "Rails app deployment recipes for Capistrano"
   s.email = "romain@softr.li"
   s.extra_rdoc_files = [
@@ -27,6 +27,7 @@ Gem::Specification.new do |s|
     "VERSION",
     "example_deploy.rb",
     "french_cuisine_deploy.gemspec",
+    "generators/maintenance.html.erb",
     "generators/monit_unicorn.conf.erb",
     "generators/nginx_host_file.ltd.erb",
     "generators/thin.yml.erb",
@@ -40,6 +41,7 @@ Gem::Specification.new do |s|
     "lib/recipes/db.rb",
     "lib/recipes/deploy.rb",
     "lib/recipes/hooks.rb",
+    "lib/recipes/maintenance.rb",
     "lib/recipes/monit.rb",
     "lib/recipes/nginx.rb",
     "lib/recipes/postgresql.rb",
