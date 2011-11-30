@@ -13,6 +13,7 @@
 #
 # TODO
 #  - Manage several servers.
+#  - Rollback by closing SSH tunnel and killing the taps server if the operation is cancelled (e.g. CTRL-C).
 
 require 'rubygems'
 begin
