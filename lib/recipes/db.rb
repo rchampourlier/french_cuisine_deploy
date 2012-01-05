@@ -191,7 +191,7 @@ Capistrano::Configuration.instance.load do
       _aset :local_database_name, { :default => local_database == 'sqlite' ? 'db/development.sqlite3' : "#{application}_dev" }
       
       if local_database == 'sqlite'
-        set :local_database_url = "sqlite://#{local_database_name}"
+        set :local_database_url, "sqlite://#{local_database_name}"
       
       elsif local_database == 'psql'
         _aset :local_database_user, { :default => application }
