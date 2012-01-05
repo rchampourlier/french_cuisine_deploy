@@ -92,6 +92,8 @@ yet installed.
 by the script, or it may start it itself. It should stop watching when we want to stop the process too.
 * Tasks for log rotation.
 * Task to reset the application's gemset (nice when removed some gems).
+* Add tasks for dumping and loading from dump PostgreSQL databases (local and remote). Would be nice way
+to sync production, staging and dev when we work with the same database system.
 
 ==Installation
 
