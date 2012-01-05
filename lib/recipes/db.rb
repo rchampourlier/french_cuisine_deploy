@@ -119,7 +119,7 @@ Capistrano::Configuration.instance.load do
     desc "Pull or push the remote database to the local current environment's database"
     task :perform_sync, :roles => :app do
       
-      _aset :sync_method, :pull
+      _aset :sync_method, { :default => :pull, :choices => [:pull, :push] }
       
       logger = Capistrano::Logger.new
 
@@ -128,35 +128,6 @@ Capistrano::Configuration.instance.load do
       set :ssh_local_port, 5000
       set :ssh_target_port, 5000
       ssh.open_tunnel
-      
-      # Start taps on the app server
-      
-      # TODO replace with autodetection of databases through database.yml file
-      
-      # Local database
-      _aset :local_database, 'sqlite'
-      _aset :local_database_name, 'db/development.sqlite3'
-      _aset :local_database_user, 'none'
-      _aset :local_database_password, 'none'
-      
-      # Remote database
-      # Using 'database' as database connector representative
-      _aset :remote_database_name
-      _aset :remote_database_user
-      _aset :remote_database_password
-      
-      if database == :postgresql
-        remote_database_url = "postgres://#{remote_database_user}:#{remote_database_password}@localhost/#{remote_database_name}"
-      else
-        logger.important "#{database} databases not supported yet."
-        abort
-      end
-      
-      if local_database == 'sqlite'
-        local_database_url = "sqlite://#{local_database_name}"
-      else
-        logger.important "#{local_database} databases not supported yet."
-      end
       
       # Run the taps operation:
       #  1. starts taps server
@@ -169,7 +140,10 @@ Capistrano::Configuration.instance.load do
     end
     
     task :pull do
-      answer = Capistrano::CLI.ui.ask("Are you sure? This will replace your local database (#{local_database_name}) by the remote one. (yes/no)") do |q|
+      db.setup
+       
+      # TODO should obfuscate the password
+      answer = Capistrano::CLI.ui.ask("Are you sure? This will replace your local database (#{local_database_url}) by the remote one (#{remote_database_url}). (yes/no)") do |q|
         q.default = "no"
         q.validate = %r%(yes|no)%
       end
@@ -181,7 +155,10 @@ Capistrano::Configuration.instance.load do
     
     desc "Pushes the current environment's database to the remote production database"
     task :push do
-      answer = Capistrano::CLI.ui.ask("Are you sure? This will replace your remote database by the local one (#{local_database_name}) (yes/no)") do |q|
+      db.setup
+      
+      # TODO should obfuscate the password
+      answer = Capistrano::CLI.ui.ask("Are you sure? This will replace your remote database (#{remote_database_url}) by the local one (#{local_database_url}) (yes/no)") do |q|
         q.default = "no"
         q.validate = %r%(yes|no)%
       end
@@ -190,6 +167,45 @@ Capistrano::Configuration.instance.load do
       set :sync_method, :push
       db.perform_sync
     end
+    
+    task :setup do
+      # TODO replace with autodetection of databases through database.yml file
+      
+      # Local database
+      _aset :local_database, { :default => 'sqlite', :choices => ['sqlite', 'psql'] }
+      
+      _aset :local_database_name, { :default => local_database == 'sqlite' ? 'db/development.sqlite3' : "#{application}_dev" }
+      _aset :local_database_user, { :default => application }
+      _aset :local_database_password, { :default => 'password' }
+      
+      # Remote database
+      # Using 'database' as database connector representative
+      _aset :remote_database_name
+      _aset :remote_database_user
+      _aset :remote_database_password
+      
+      # Build the local and remote database urls
+      
+      if database == :postgresql
+        set :remote_database_url, "postgres://#{remote_database_user}:#{remote_database_password}@localhost/#{remote_database_name}"
+      else
+        logger.important "#{database} databases not supported yet."
+        abort
+      end
+      
+      if local_database == 'sqlite'
+        local_database_url = "sqlite://#{local_database_name}"
+      
+      elsif local_database == 'psql'
+        _aset :local_database_user
+        _aset :local_database_host
+        set   :local_database_url, "postgres://#{local_database_user}:#{local_database_password}@#{local_database_host}/#{local_database_name}"
+      
+      else
+        logger.important "#{local_database} databases not supported yet."
+      end
+    end
+    
   end
   
 end

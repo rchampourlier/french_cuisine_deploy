@@ -1,12 +1,37 @@
 # This ask the user to set the value if not already set. This can be used
 # for values which can't be set to defaults. If the user does not provide
 # a value, the rake task is to be stopped.
-def _aset(name, *default_value)
+#
+# options is expected to be a hash. The following options are accepted:
+#  - :default => a default value
+#  - :choices => a list of choices that will be displayed with the prompt
+#
+def _aset(name, *options)
+  
+  if options.any?
+    options = options.first
+    default_value = options[:default]
+    choices = options[:choices]
+  else
+    default_value = choices = nil
+  end
+  
   unless exists?(name)
     Capistrano::CLI.ui.say("Need a value for '#{name}'. (You can set this value in your deploy.rb file.)")
-    prompt = default_value.empty? ? "Enter value (return will abort): " : "Enter value:"
+    
+    prompt = default_value.nil? ? "Enter value (return will abort): " : "Enter value:"
+    if default_value && choices && choices.any?
+      prompt = "Enter a value (possible choices: #{choices}). Default is:"
+    elsif default_value
+      prompt = "Enter a value. Default is:"
+    elsif choices && choices.any?
+      prompt = "Enter a value (possible choices: #{choices}). No entry will abort."
+    else
+      prompt = "Enter a value. No entry will abort."
+    end
+    
     value = Capistrano::CLI.ui.ask(prompt) do |q|
-      q.default = default_value.first unless default_value.empty?
+      q.default = default_value unless default_value.nil?
     end
     if value.length == 0
       exit
