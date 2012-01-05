@@ -171,13 +171,6 @@ Capistrano::Configuration.instance.load do
     task :setup do
       # TODO replace with autodetection of databases through database.yml file
       
-      # Local database
-      _aset :local_database, { :default => 'sqlite', :choices => ['sqlite', 'psql'] }
-      
-      _aset :local_database_name, { :default => local_database == 'sqlite' ? 'db/development.sqlite3' : "#{application}_dev" }
-      _aset :local_database_user, { :default => application }
-      _aset :local_database_password, { :default => 'password' }
-      
       # Remote database
       # Using 'database' as database connector representative
       _aset :remote_database_name
@@ -193,11 +186,16 @@ Capistrano::Configuration.instance.load do
         abort
       end
       
+      # Local database
+      _aset :local_database, { :default => 'sqlite', :choices => ['sqlite', 'psql'] }
+      _aset :local_database_name, { :default => local_database == 'sqlite' ? 'db/development.sqlite3' : "#{application}_dev" }
+      
       if local_database == 'sqlite'
-        local_database_url = "sqlite://#{local_database_name}"
+        set :local_database_url = "sqlite://#{local_database_name}"
       
       elsif local_database == 'psql'
-        _aset :local_database_user
+        _aset :local_database_user, { :default => application }
+        _aset :local_database_password, { :default => 'password' }
         _aset :local_database_host
         set   :local_database_url, "postgres://#{local_database_user}:#{local_database_password}@#{local_database_host}/#{local_database_name}"
       
