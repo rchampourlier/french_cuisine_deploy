@@ -1,3 +1,7 @@
+V0.0.14
+* Added rbenv recipe to support rbenv as a replacement for RVM. The recipe contains no task, only setup the
+environment for Capistrano deployment to work seemlessly with rbenv when :using_rbenv is set.
+
 V0.0.13
 * Moved db tasks to taps.
 * Creating new db tasks using dump instead of taps.
