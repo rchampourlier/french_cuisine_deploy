@@ -1,6 +1,6 @@
 # TASKS
 # nginx.setup
-# nginx.setup_clean
+# nginx.clean_setup
 # nginx.reload
 # nginx.restart
 # nginx.start
@@ -37,7 +37,7 @@ Capistrano::Configuration.instance.load do
     end
     
     desc "Remove the nginx configuration file for this app"
-    task :setup_clean, :roles => :web do
+    task :clean_setup, :roles => :web do
       sudo "rm -f #{host_confs_prefix}/sites-available/#{nginx_host_config_name}"
       sudo "rm -f #{host_confs_prefix}/sites-enabled/#{nginx_host_config_name}"
       run "rm -f #{nginx_host_config}"

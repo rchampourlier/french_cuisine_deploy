@@ -21,7 +21,7 @@ Capistrano::Configuration.instance.load do
   _cset :startup_script_prefix, '/etc/init.d'
 
   # Server settings
-  _cset :app_server, :unicorn
+  _cset :app_server, :thin
   _cset :web_server, :nginx
   _cset :runner, user
   _cset :application_port, 80
@@ -33,7 +33,10 @@ Capistrano::Configuration.instance.load do
   _cset :database, :postgresql
   
   # Monitoring settings
-  _cset :process_monitorer, :none
+  _cset :process_monitor, :none
+
+  # Background process
+  _cset :background_processor, :none  # :none or :delayed_job
 
   # SCM settings
   _cset :scm,           :git
@@ -54,9 +57,9 @@ Capistrano::Configuration.instance.load do
   end
 
   # RVM settings
-  _cset :using_rvm, true
+  _cset :ruby_manager, :rbenv
 
-  if using_rvm
+  if is_using_rvm
     $:.unshift(File.expand_path('./lib', ENV['rvm_path']))  # Add RVM's lib directory to the load path.
     require "rvm/capistrano"                                # Load RVM's capistrano plugin.
 
@@ -85,16 +88,34 @@ Capistrano::Configuration.instance.load do
       end
     end
     
-    task :setup_app_server, :roles => :app do
+    task :web_server_setup, :roles => :app do
       eval "#{web_server}.setup"
-      eval "#{app_server}.setup"
       eval "#{web_server}.reload"
     end
     
-    task :clean_app_server_setup, :roles => :app do
-      eval "#{web_server}.setup_clean"
-      eval "#{app_server}.setup_clean"
+    task :clean_web_server_setup, :roles => :app do
+      eval "#{web_server}.clean_setup"
       eval "#{web_server}.reload"
+    end
+    
+    task :reset_web_server_setup, :roles => :app do
+    end
+    
+    task :setup, :roles => :app do
+      eval "#{app_server}.setup"
+      eval "#{background_processor}.setup" if is_using_background_processor
+      eval "#{process_monitor}.setup" if is_using_process_monitor
+    end
+    
+    task :clean_setup, :roles => :app do
+      eval "#{app_server}.clean_setup"
+      eval "#{background_processor}.clean_setup" if is_using_background_processor
+      eval "#{process_monitor}.clean_setup" if is_using_process_monitor
+    end
+    
+    task :reset_setup, :roles => :app do
+      clean_setup
+      setup
     end
     
     task :change_server, :roles => :app do
@@ -110,25 +131,33 @@ Capistrano::Configuration.instance.load do
       
       # Temporary change app_server to old one to perform the cleaning operations
       set :app_server, server.to_sym
-      clean_app_server_setup
+      clean_setup
       stop
       
       # Restore the current app_server, do the setup and start it.
       set :app_server, current_server
-      setup_app_server
+      setup
       start
     end
     
+    # Called by deploy:start
     task :start, :roles => :app do
       eval "#{app_server}.start"
+      eval "#{background_processor}.start" if is_using_background_processor
+      eval "#{process_monitor}.start_monitoring" if is_using_process_monitor
     end
     
+    # Called by deploy:stop
     task :stop, :roles => :app do
+      eval "#{process_monitor}.stop_monitoring" if is_using_process_monitor
+      eval "#{background_processor}.stop" if is_using_background_processor
       eval "#{app_server}.stop"
     end
     
+    # Called by deploy:restart
     task :restart, :roles => :app do
       eval "#{app_server}.restart"
+      eval "#{background_processor}.restart" if is_using_background_processor
     end
     
   end

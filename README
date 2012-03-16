@@ -7,7 +7,7 @@ Capistrano recipes useful for deployment, including:
 *** Ubuntu 10.04 LTS server (may work on other servers, but adapted with this one in mind),
 *** served through a nginx proxy (standard distrib installation),
 *** PostgreSQL database (for now),
-*** monit process monitoring (may be disabled, only monitorer supported for now),
+*** monit process monitoring (may be disabled, only monitor supported for now),
 *** Unicorn Rails application server (only one supported for now).
 ** What does the script do:
 *** setup the app's directories (shared, config, log, sockets...),
@@ -49,7 +49,7 @@ Web server:
 * cap nginx:start
 * cap nginx:stop
 * cap nginx:restart
-* cap nginx:setup_clean: remove nginx setup files
+* cap nginx:clean_setup: remove nginx setup files
 * cap nginx:setup_recreate: clean then setup
 
 Application servers:
@@ -117,6 +117,15 @@ Inside the newly created config/deploy.rb, add:
 
   # This one should go at the end of your deploy.rb
   require 'ricodigo_capistrano_recipes'
+
+===rbenv
+
+rbenv is not used in place of RVM for ruby management. It's more lightweight, and less
+head-banging-prone when trying to deal with startup scripts or managers (ie. god).
+
+:rbenv is set as the default ruby_manager
+You can disable it by setting ruby_manager to :rvm instead, or to :none if you don't use
+a Ruby manager (which would not be advised by more expert-people-than-me).
 
 ===RVM
 

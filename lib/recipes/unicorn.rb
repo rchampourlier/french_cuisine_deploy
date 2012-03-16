@@ -20,10 +20,9 @@ Capistrano::Configuration.instance.load do
   set(:unicorn_user) { user }   unless exists?(:unicorn_user)
   set(:unicorn_group) { group } unless exists?(:unicorn_group)
 
-  # The unicorn template to be parsed by erb. You must copy this file to your app's vendor directory
-  # (vendor/unicorn_template.rb.erb). Capistrano will search it locally, so you don't need to track it
-  # in git. However, it may be helpful to have in there so anybody can use it to deploy.
   _cset :unicorn_template,                File.join(templates_path, "unicorn.rb.erb")
+  
+  # Used to build unicorn's system startup scripts
   _cset :unicorn_startup_script_template, File.join(templates_path, "unicorn_startup_script.erb")
   _cset :unicorn_startup_script_name,     "unicorn_#{application}"
   _cset :unicorn_startup_script_path,     "#{startup_script_prefix}/#{unicorn_startup_script_name}"
@@ -31,15 +30,7 @@ Capistrano::Configuration.instance.load do
   _cset :unicorn_stoplevels,              "0 1 6"
   _cset :unicorn_startorder,              "21"
   _cset :unicorn_killorder,               "19"
-
-  if process_monitorer == :monit
-    # The monit config template for the unicorn process. Expected in /vendor/monit_unicorn.conf.erb
-    _cset :unicorn_monit_template,          File.join(templates_path, "monit_unicorn.conf.erb")
-    _cset :unicorn_monit_conf_prefix,       monit_conf_prefix
-    _cset :unicorn_monit_conf_name,         "monit_unicorn_#{application}.conf"
-    _cset :unicorn_monit_conf_path,         "#{unicorn_monit_conf_prefix}/#{unicorn_monit_conf_name}"
-  end
-
+  
   # Unicorn deployment tasks
   namespace :unicorn do
     desc "Starts unicorn directly"
@@ -81,7 +72,7 @@ Capistrano::Configuration.instance.load do
       # Position the script for loading at server's boot.
       sudo "update-rc.d #{unicorn_startup_script_name} start #{unicorn_startorder} #{unicorn_runlevels} . stop #{unicorn_killorder} #{unicorn_stoplevels} ."
 
-      if process_monitorer == :monit
+      if process_monitor == :monit
         # Adds the monit config file for this process.
         generate_config(unicorn_monit_template, "#{shared_path}/#{unicorn_monit_conf_name}")
         sudo "mv #{shared_path}/#{unicorn_monit_conf_name} #{unicorn_monit_conf_path}"
@@ -91,7 +82,7 @@ Capistrano::Configuration.instance.load do
     end
     
     desc <<-EOF
-    Clean the Unicorn setup files: Unicorn's config, startup script, process monitorer conf file.
+    Clean the Unicorn setup files: Unicorn's config, startup script, process monitor conf file.
     EOF
     task :setup_clean, :roles => :app do
       
@@ -101,7 +92,7 @@ Capistrano::Configuration.instance.load do
       # Un-position from startup services
       sudo "update-rc.d #{unicorn_startup_script_name} remove"
       
-      if process_monitorer == :monit
+      if process_monitor == :monit
         # Remove the monit conf file if needed
         sudo "rm #{unicorn_monit_conf_path}"
       end

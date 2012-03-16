@@ -77,6 +77,14 @@ def is_using_git
   is_using('git', :scm)
 end
 
+def is_using_rvm
+  is_using('rvm', :ruby_manager)
+end
+
+def is_using_rbenv
+  is_using('rbenv', :ruby_manager)
+end
+
 def is_using_nginx
   is_using('nginx',:web_server)
 end
@@ -89,16 +97,46 @@ def is_using_unicorn
   is_using('unicorn',:app_server)
 end
 
+def is_using_thin
+  is_using('thin',:app_server)
+end
+
 def is_using_monit
-  is_using('monit', :process_monitorer)
+  is_using('monit', :process_monitor)
 end
 
 def is_using_bluepill
-  is_using('bluepill', :process_monitorer)
+  is_using('bluepill', :process_monitor)
+end
+
+def is_using_process_monitor
+  process_monitor && process_monitor != :none
+end
+
+def is_using_god
+  is_using('god', :process_monitor)
+end
+
+def is_using_background_processor
+  background_processor && background_processor != :none
+end
+
+def is_using_delayed_job
+  is_using('delayed_job', :background_processor)
 end
 
 def is_using(something, with_some_var)
  exists?(with_some_var.to_sym) && fetch(with_some_var.to_sym).to_s.downcase == something
+end
+
+# Helpers determining if the chosen process monitorer manages some processes completely,
+# i.e. they don't need to be started up with the system boot service for example.
+def process_monitor_manages_app_server
+  is_using_god && is_using_thin ? true : false
+end
+
+def process_monitor_manages_background_processor
+  is_using_god && is_using_delayed_job ? true : false
 end
 
 # Path to where the generators live

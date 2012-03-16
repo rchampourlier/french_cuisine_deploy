@@ -4,7 +4,7 @@ Capistrano::Configuration.instance.load do
   after 'deploy:setup' do
     bundler.setup
     app.setup_shared_dirs
-    app.setup_app_server
+    app.setup_server
   end
   
 end

@@ -1,3 +1,8 @@
+V0.0.15
+* Added God support:
+** If :using_god is set, god will be used to start application's required processes (generally the app server
+- Thin, Unicorn - and background processor - Resque, DelayedJob).
+
 V0.0.14
 * Added rbenv recipe to support rbenv as a replacement for RVM. The recipe contains no task, only setup the
 environment for Capistrano deployment to work seemlessly with rbenv when :using_rbenv is set.

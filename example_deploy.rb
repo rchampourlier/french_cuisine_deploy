@@ -17,6 +17,7 @@
 #     - adds a config file to monitor the unicorn instance in monit.
 #
 # TODO
+# - update for new parameters
 # - use CLI for passwords
 # - write a remove task# ESSENTIALS
 
@@ -48,7 +49,7 @@ set :branch,            'branch'                                                
 set :web_server,        :nginx        # possible values: [:nginx]                     default: :nginx
 set :app_server,        :unicorn      # possible values: [:unicorn, :thin]            default: :unicorn
 set :database,          :postgresql   # possible values: [:postgresql]                default: :postgresql
-set :process_monitorer, :monit        # possible values: [:none, :monit]              default: :none
+set :process_monitor, :monit        # possible values: [:none, :monit]              default: :none
 
 set :sockets_path,      File.join(shared_path, "sockets")                           # default: File.join(shared_path, "sockets")
 set :pids_path,         File.join(shared_path, "pids")                              # default: File.join(shared_path, "pids")
@@ -63,8 +64,8 @@ set :host_confs_prefix, "/etc/nginx"                                            
 
 set :rails_env,         'production'                                                # default: 'production'
 
-set :using_rvm,         true          # possible values: [true, false]                default: true
-set :rvm_ruby_string,   "ruby-1.9.2-p290@#{application}"                            # required if using rvm
+set :ruby_manager,      :rbenv        # possible values: :rvm or :rbenv             # default: :rbenv
+set :rvm_ruby_string,   "ruby-1.9.2-p290@#{application}" if is_using_rvm            # required if using rvm
 
 
 # APP SERVER CONFIGURATION
