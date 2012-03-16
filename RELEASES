@@ -1,3 +1,7 @@
+V0.0.13
+* Moved db tasks to taps.
+* Creating new db tasks using dump instead of taps.
+
 V0.0.12
 * Changed db:push/pull tasks to allow working with a local PostgreSQL database. Ongoing evolution,
   expect it to be unstable.
