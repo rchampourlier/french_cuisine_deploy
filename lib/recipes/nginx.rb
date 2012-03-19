@@ -28,6 +28,16 @@ Capistrano::Configuration.instance.load do
   # Override them as needed.
   namespace :nginx do
     
+    desc <<-EOF
+    Regenerates the nginx configuration file for the app, uploads it and
+    reload nginx so that it takes the new configuration.
+    EOF
+    task :reload_setup, :roles => :web do
+      _aset :domain_names
+      generate_config(nginx_template, nginx_host_config)
+      reload
+    end
+    
     desc "Parses and uploads nginx configuration for this app"
     task :setup, :roles => :web , :except => { :no_release => true } do
       _aset :domain_names
