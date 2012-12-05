@@ -156,8 +156,10 @@ Capistrano::Configuration.instance.load do
     
     # Called by deploy:restart
     task :restart, :roles => :app do
+      eval "#{process_monitor}.stop_monitoring" if is_using_process_monitor
       eval "#{app_server}.restart"
       eval "#{background_processor}.restart" if is_using_background_processor
+      eval "#{process_monitor}.start_monitoring" if is_using_process_monitor
     end
     
   end

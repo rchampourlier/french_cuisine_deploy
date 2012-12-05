@@ -29,7 +29,7 @@ set :user,              'username'                                              
 set :group,             'groupname'                                                 # required
 set :deploy_to,         "/home/#{user}/rails/#{application}"
 
-set :domain_names,      'server'                                                    # required
+set :server_name,      'server'                                                    # required
 set :app_uses_ssl,      false                                                       # default: false
 
 role :app,              'server'

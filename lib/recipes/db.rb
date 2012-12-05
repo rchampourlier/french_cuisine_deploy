@@ -32,7 +32,7 @@ Capistrano::Configuration.instance.load do
       _aset :remote_db_name
       _aset :remote_db_user
       _aset :remote_db_password
-      _cset :dump_file, "/tmp/french_cuisine_deploy_db_pull_dump"
+      _cset :dump_file, "/tmp/french_cuisine_deploy_db_dump"
       run "PGPASSWORD='#{remote_db_password}' psql -U #{remote_db_user} #{remote_db_name} < #{dump_file}"
     end
     
@@ -45,10 +45,10 @@ Capistrano::Configuration.instance.load do
         _aset :remote_db_name
         _aset :remote_db_user
         _aset :remote_db_password
-        set :local_dump_file, 'french_cuisine_deploy_db_pull_dump'
+        set :local_dump_file, 'french_cuisine_deploy_db_dump'
         unset :local_dump_file unless FileTest.exist?(local_dump_file)
         _aset :local_dump_file
-        _cset :dump_file, "/tmp/french_cuisine_deploy_db_pull_dump"
+        _cset :dump_file, "/tmp/french_cuisine_deploy_db_dump"
         answer = Capistrano::CLI.ui.ask("Are you sure? This will replace your #{stage} database by the local dump (#{local_dump_file}) (yes/no)") do |q|
           q.default = "no"
           q.validate = %r%(yes|no)%

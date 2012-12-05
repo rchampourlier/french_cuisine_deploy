@@ -14,15 +14,16 @@ Capistrano::Configuration.instance.load do
   _cset :app_uses_ssl,      false
   _cset :app_port_ssl,      443
   
-  # The nginx template to be parsed by erb. You must copy this file to your app's vendor directory
-  # (vendor/nginx_template.rb.erb). Capistrano will search it locally, so you don't need to track it
-  # in git. However, it may be helpful to have in there so anybody can use it to deploy.
+  # The nginx template to be parsed by erb. By default, the recipe will use the
+  # generators/nginx_host_file.ltd.erb default file. You can configure most of it
+  # through deployment variables, however you can also copy the template in your
+  # project's directory and set the :nginx_template variable to your own template's
+  # path, so that it can be used to configure your nginx server.
+  # This is particularly useful when you need project-specific configuration (such
+  # as specific assets routing, SSL configuration, etc.)
   _cset :nginx_template,          File.join(templates_path, "nginx_host_file.ltd.erb")
   _cset :nginx_host_config_name,  "#{application}.tld"
   _cset :nginx_host_config,       "#{config_path}/#{nginx_host_config_name}"
-  
-  # Defaults the nginx_host_file_additional_location to an empty string.
-  _cset :nginx_host_file_additional_location, ''
   
   # Nginx tasks are not *nix agnostic, they assume you're using Debian/Ubuntu.
   # Override them as needed.
@@ -33,14 +34,14 @@ Capistrano::Configuration.instance.load do
     reload nginx so that it takes the new configuration.
     EOF
     task :reload_setup, :roles => :web do
-      _aset :domain_names
+      _aset :server_name
       generate_config(nginx_template, nginx_host_config)
       reload
     end
     
     desc "Parses and uploads nginx configuration for this app"
     task :setup, :roles => :web , :except => { :no_release => true } do
-      _aset :domain_names
+      _aset :server_name
       generate_config(nginx_template, nginx_host_config)
       sudo "ln -sf #{nginx_host_config} #{host_confs_prefix}/sites-available/"
       sudo "ln -sf #{nginx_host_config} #{host_confs_prefix}/sites-enabled/"

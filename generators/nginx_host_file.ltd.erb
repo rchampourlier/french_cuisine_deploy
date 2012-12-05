@@ -1,4 +1,10 @@
-# Some changes made on https://github.com/ricodigo/ricodigo-capistrano-recipes/blob/master/generators/nginx.conf.erb
+# nginx configuration file for Rails app
+# ERB generator to be used from Capistrano recipes
+#
+# Can be used with thin or unicorn Rails app servers
+#
+# References
+#  - https://github.com/ricodigo/ricodigo-capistrano-recipes/blob/master/generators/nginx.conf.erb
 
 upstream <%= application %>_app_server {
   <% if app_server == :unicorn %>
@@ -12,196 +18,130 @@ upstream <%= application %>_app_server {
   <% end %>
 }
 
+<% ([:main] + (app_uses_ssl ? [:ssl] : [])).each do |server| %>
+
 # <%= application %> Server
 server {
-    listen <%= app_port %>;
-    client_max_body_size 500M;
-    server_name <%= domain_names %>;
 
-    # ~2 seconds is often enough for most folks to parse HTML/CSS and
-    # retrieve needed images/icons/frames, connections are cheap in
-    # nginx so increasing this is generally safe...
-    keepalive_timeout 5;
+  listen <%= server == :ssl ? app_port_ssl : app_port %>;
+  client_max_body_size 500M;
+  server_name <%= server_name %>;
 
-    # path for static files
-    root <%= deploy_to %>/current/public;
-    access_log <%= log_path %>/nginx.access.log;
-    error_log  <%= log_path %>/nginx.error.log;
-
-    location / {
-      
-      if (-f <%= maintenance_page_path %>) {
-        return 503;
-      }
-      
-      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-      proxy_set_header Host $http_host;
-
-      # If the file exists as a static file serve it directly without
-      # running all the other rewite tests on it
-      if (-f $request_filename) {
-        break;
-      }
-
-      # check for index.html for directory index
-      # if its there on the filesystem then rewite
-      # the url to add /index.html to the end of it
-      # and then break to send it to the next config rules.
-      if (-f $request_filename/index.html) {
-        rewrite (.*) $1/index.html break;
-      }
-
-      # this is the meat of the rails page caching config
-      # it adds .html to the end of the url and then checks
-      # the filesystem for that file. If it exists, then we
-      # rewite the url to have explicit .html on the end
-      # and then send it on its way to the next config rule.
-      # if there is no file on the fs then it sets all the
-      # necessary headers and proxies to our upstream mongrels
-      if (-f $request_filename.html) {
-        rewrite (.*) $1.html break;
-      }
-
-      if (!-f $request_filename) {
-        proxy_pass http://<%= application %>_app_server;
-        break;
-      }
-    }
-
-    # Now this supposedly should work as it gets the filenames with querystrings that Rails provides.
-    # BUT there's a chance it could break the ajax calls.
-    location ~* \.(ico|css|gif|jpe?g|png)(\?[0-9]+)?$ {
-       expires max;
-       break;
-    }
-
-    location ~ ^/javascripts/.*\.js(\?[0-9]+)?$ {
-       expires max;
-       break;
-    }
-
-    # If the request is for a static resource, nginx should serve it directly
-    # and add a far future expires header to it, making the browser
-    # cache the resource and navigate faster over the website
-    location ~ ^/(images|javascripts|stylesheets|system)/ {
-      root <%= deploy_to %>/current/public;
-      expires max;
-      break;
-    }
-    
-    # Project's additional locations
-    <%= nginx_host_file_additional_location %>
-
-    # Rails error pages
-    error_page 500 502 504 /500.html;
-    location = /500.html {
-      root <%= deploy_to %>/current/public;
-    }
-    
-    # Maintenance error page
-    error_page 503 @maintenance;
-    location @maintenance {
-      root <%= deploy_to %>/shared/system;
-      rewrite ^(.*)$ /maintenance.html break;
-    }
-}
-
-<% if app_uses_ssl %>
-
-upstream <%= application %>_app_ssl {
-  <% if app_server == :unicorn %>
-    server unix://<%= unicorn_socket %> fail_timeout=0;
-  <% end %>
-  <% if app_server == :thin %>
-    <% workers.times do |n| %>
-      <% socket = "#{thin_socket.match(%r%.*thin%).to_s}.#{n}#{thin_socket.match(%r%.*thin%).post_match}"%>
-      server unix:<%= socket %> fail_timeout=0;
-    <% end %>
-  <% end %>
-}
-
-# This server is setup for ssl. Uncomment if
-# you are using ssl as well as port 80.
-server {
-  listen <%= app_port_ssl %>;
-  server_name <%= domain_names %>;
-
+  <% if server == :ssl %>
   ssl                     on;
-  ssl_certificate         /etc/ssl/certs/server.crt;
-  ssl_certificate_key     /etc/ssl/private/server.key;
+  ssl_certificate         /etc/ssl/certs/<%= application %>.crt;
+  ssl_certificate_key     /etc/ssl/private/<%= application %>.key;
   ssl_session_timeout     5m;
-  client_max_body_size    50M;
+  <% end %>
+  
+  #rewrite_log on;
 
+  # ~2 seconds is often enough for most folks to parse HTML/CSS and
+  # retrieve needed images/icons/frames, connections are cheap in
+  # nginx so increasing this is generally safe...
+  keepalive_timeout 5;
+
+  # path for static files
   root <%= deploy_to %>/current/public;
-  access_log <%= deploy_to %>/current/log/nginx.access.log;
-  error_log  <%= deploy_to %>/current/log/nginx.error.log;
+  
+  # Logs
+  access_log <%= log_path %>/nginx<%= server == :ssl ? '.ssl' : '' %>.access.log;
+  error_log  <%= log_path %>/nginx<%= server == :ssl ? '.ssl' : '' %>.error.log;
 
-  # this rewrites all the requests to the maintenance.html
-  # page if it exists in the doc root. This is for capistrano's
-  # disable web task
-  if (-f <%= maintenance_page_path %>) {
-    rewrite  ^(.*)$  /maintenance.html break;
+  # With try_files, $uri is the right keyword to use. $request_filename
+  # will not work.
+  #
+  location / {
+    # Returns file if it exists, else send to app server's location
+    try_files $uri @app_server;
   }
 
-  location / {
-    
-    if (-f <%= maintenance_page_path %>) {
-      return 503;
-    }
-      
-    # needed to forward user's IP address to rails
-    proxy_set_header  X-Real-IP  $remote_addr;
-
-    # needed for HTTPS
-    proxy_set_header X_FORWARDED_PROTO https;
-
-    proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
+  # location @app_server
+  # Proxy to Rails app server
+  #
+  location @app_server {
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header Host $http_host;
+    proxy_pass http://<%= application %>_app_server;
+    
+    <% if server == :ssl %>
+    proxy_set_header X-Forwarded-Proto https;
     proxy_redirect off;
     proxy_max_temp_file_size 0;
-
-
-    # If the file exists as a static file serve it directly without
-    # running all the other rewite tests on it
-    if (-f $request_filename) {
-      break;
-    }
-
-    # check for index.html for directory index
-    # if its there on the filesystem then rewite
-    # the url to add /index.html to the end of it
-    # and then break to send it to the next config rules.
-    if (-f $request_filename/index.html) {
-      rewrite (.*) $1/index.html break;
-    }
-
-    # this is the meat of the rails page caching config
-    # it adds .html to the end of the url and then checks
-    # the filesystem for that file. If it exists, then we
-    # rewite the url to have explicit .html on the end
-    # and then send it on its way to the next config rule.
-    # if there is no file on the fs then it sets all the
-    # necessary headers and proxies to our upstream mongrels
-    if (-f $request_filename.html) {
-      rewrite (.*) $1.html break;
-    }
-
-    if (!-f $request_filename) {
-      proxy_pass http://<%= application %>_app_ssl;
-      break;
-    }
+    <% end %>
   }
 
-  error_page   500 502 504  /500.html;
+  # Locations matching /system and /assets
+  # /system currently used for qrcodes, avatars
+  # /assets used for Jammit generated assets (css, js)
+  #
+  # current/public/system should be symlinked to shared/system to
+  # keep system content throughout new releases
+  #
+  # Tries to get the file locally. If not found, proxies to @app_server
+  # location
+  #
+  location ^~ /system/ {
+    try_files $uri @app_server;
+    expires max;
+    add_header Pragma public;
+    add_header Cache-Control "public, must-revalidate, proxy-revalidate";
+    break;
+  }
+  location ^~ /assets/ {
+    try_files $uri @app_server;
+    expires max;
+    add_header Pragma public;
+    add_header Cache-Control "public, must-revalidate, proxy-revalidate";
+    break;
+  }
+
+  # This block will catch static file requests, such as images, css, js
+	# The ?: prefix is a 'non-capturing' mark, meaning we do not require
+	# the pattern to be captured into $1 which should help improve performance
+  # Now this supposedly should work as it gets the filenames with querystrings that Rails provides.
+  # BUT there's a chance it could break the ajax calls.
+  #
+  location ~* \.(?:ico|gif|jpe?g|png)(\?[0-9]+)?$ {
+     # Some basic cache-control for static files to be sent to the browser
+     expires max;
+     add_header Pragma public;
+     add_header Cache-Control "public, must-revalidate, proxy-revalidate";
+     break;
+  }
+
+	location = /robots.txt  { access_log off; log_not_found off; }
+	location = /favicon.ico { access_log off; log_not_found off; }	
+
+	# This prevents hidden files (beginning with a period) from being served
+	location ~ /\.          { access_log off; log_not_found off; deny all; }
+
+  # Maintenance and error pages
+  
+  # Rails error pages
+  error_page 500 502 504 /500.html;
   location = /500.html {
-    root   <%= deploy_to %>/current/public;
+    root <%= deploy_to %>/current/public;
   }
-   
+  
+  # Maintenance management
+  #
+  # If the maintenance file is present, returns a 503 temporary unavailable error, which
+  # will display the maintenance file thanks to the error_page directive
+  #
+  if (-f <%= maintenance_page_path %>) {
+    return 503;
+  }
+  
   # Maintenance error page
+  location @error503 {
+    return 503;
+  }
   error_page 503 @maintenance;
   location @maintenance {
     root <%= deploy_to %>/shared/system;
     rewrite ^(.*)$ /maintenance.html break;
   }
 }
-<% end %>
+
+<% end %> 

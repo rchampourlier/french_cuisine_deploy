@@ -20,8 +20,8 @@ begin
   gem 'taps', '>= 0.3.23', '< 0.4.0'
   require 'taps/operation'
 rescue LoadError
-  puts "Install the Taps gem to use taps commands. On most systems this will be:\nsudo gem install taps"
-  exit
+  #puts "Install the Taps gem to use taps commands. On most systems this will be:\nsudo gem install taps"
+  #exit
 end
 
 module FrenchCuisineDeploy::Taps
