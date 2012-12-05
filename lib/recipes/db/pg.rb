@@ -9,13 +9,6 @@ Capistrano::Configuration.instance.load do
         _aset :pg_db_password
       end
 
-      def deny_in_production
-        if stage == "production"
-          puts "Can't push to production"
-          abort
-        end
-      end
-
       _cset :local_pg_dump, 'fc_pg_dump'
       unset :local_pg_dump unless FileTest.exist?(local_pg_dump)
       _cset :remote_pg_dump, "/tmp/fc_pg_dump"
@@ -64,11 +57,7 @@ Capistrano::Configuration.instance.load do
         deny_in_production
         
         _aset :local_pg_dump
-        answer = Capistrano::CLI.ui.ask("Are you sure? This will replace your #{stage} PostgreSQL DB by the local dump (#{local_pg_dump}) (yes/no)") do |q|
-          q.default = "no"
-          q.validate = %r%(yes|no)%
-        end
-        abort unless answer == "yes"
+        ask "Are you sure? This will replace your #{stage} PostgreSQL DB by the local dump (#{local_pg_dump}) (yes/no)", false
 
         restore
       end

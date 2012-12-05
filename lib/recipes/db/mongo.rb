@@ -7,13 +7,6 @@ Capistrano::Configuration.instance.load do
         _aset :mongo_db_name
       end
 
-      def deny_in_production
-        if stage == "production"
-          puts "Can't push to production"
-          abort
-        end
-      end
-
       _cset :local_mongo_dumps_dir, 'fc_pg_dump'
       unset :local_mongo_dumps_dir unless FileTest.exist?(local_mongo_dumps_dir)
       _cset :remote_mongo_dump, "/tmp/fc_mongo_dump.bson"
@@ -54,12 +47,8 @@ Capistrano::Configuration.instance.load do
         unset :local_mongo_dumps_dir unless FileTest.exist?(local_mongo_dumps_dir)
         _aset :local_mongo_dumps_dir
 
-        answer = Capistrano::CLI.ui.ask("Are you sure? This will replace your #{stage} MongoDB by the BSON dumps in #{local_mongo_dumps_dir} (yes/no)") do |q|
-          q.default = "no"
-          q.validate = %r%(yes|no)%
-        end
-        abort unless answer == "yes"
-
+        ask "Are you sure? This will replace your #{stage} MongoDB by the BSON dumps in #{local_mongo_dumps_dir} (yes/no)", false
+        
         restore
       end
     end
