@@ -13,7 +13,5 @@ Capistrano::Configuration.instance.load do
     task :install, :roles => :app, :except => { :no_release => true } do
       run "cd #{current_path} && bundle install --deployment --without=development test"
     end
-    
   end
-  
 end

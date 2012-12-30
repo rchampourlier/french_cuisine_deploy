@@ -3,9 +3,8 @@ module FrenchCuisineDeploy::SSH
   
   def command(user, target_server, local_port, target_port)
     "ssh -f #{user}@#{target_server} -L #{local_port}:127.0.0.1:#{target_port} -N"
-  end # def command
-  
-end # module FrenchCuisineDeploy::DB
+  end
+end
 
 Capistrano::Configuration.instance.load do
 
@@ -20,7 +19,7 @@ Capistrano::Configuration.instance.load do
       _aset :ssh_target_port
       ssh_command = FrenchCuisineDeploy::SSH.command user, ssh_target_server, ssh_local_port, ssh_target_port
       run_locally "#{ssh_command} </dev/null >/dev/null 2>&1" # these keys ensure the process does return
-    end # task :open_tunnel
+    end
     
     task :close_tunnel do
       _cset :ssh_target_server, roles[:app].servers.first.to_s
@@ -30,10 +29,8 @@ Capistrano::Configuration.instance.load do
       ssh_command = FrenchCuisineDeploy::SSH.command user, ssh_target_server, ssh_local_port, ssh_target_port
       run_locally "kill `ps auxww|grep '#{ssh_command}' | grep -v grep | awk '{print $2}'`"
     end
-    
-  end # namespace :ssh
-  
-end # Capistrano::Configuration.instance.load
+  end
+end
 
 
 # This may be another way for opening a tunnel, but not working as is.

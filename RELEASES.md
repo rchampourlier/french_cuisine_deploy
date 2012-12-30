@@ -1,41 +1,58 @@
-V0.0.15
+# Releases
+
+## V0.0.16
+
+* Removed RVM support.
+* Removed taps-related recipes.
+
+## V0.0.15
+
 * Added God support:
 ** If :using_god is set, god will be used to start application's required processes (generally the app server
 - Thin, Unicorn - and background processor - Resque, DelayedJob).
 
-V0.0.14
+## V0.0.14
+
 * Added rbenv recipe to support rbenv as a replacement for RVM. The recipe contains no task, only setup the
 environment for Capistrano deployment to work seemlessly with rbenv when :using_rbenv is set.
 
-V0.0.13
+## V0.0.13
+
 * Moved db tasks to taps.
 * Creating new db tasks using dump instead of taps.
 
-V0.0.12
+## V0.0.12
+
 * Changed db:push/pull tasks to allow working with a local PostgreSQL database. Ongoing evolution,
   expect it to be unstable.
 
-V0.0.11
+## V0.0.11
+
 * Added maintenance:on, maintenance:off tasks that upload/delete a file to the remote server
   to display a maintenance page with a 503 response. (Similar to Heroku's)
 * Many corrections (nginx virtual host file, db tasks for database syncing).
 
-V0.0.10
+## V0.0.10
+
 * added db recipes (db:pull and db:push tasks for db synchronization using 'taps')
 * added ssh recipes (open/close SSH tunnel)
 * added app:change_server task performing the operations required when changing the Rails' app server
 
-V0.0.9
+## V0.0.9
+
 * moved rvm.trust_rvmrc task to french_cuisine_bootstrap since it only have to be done once
   for all the projects deployed on a server.
 
-V0.0.8
+## V0.0.8
+
 * rvm.trust_rvmrc task now trust the rvmrc for both the absolute release path, and the symlinked
   current path. This is needed because we use the symlink in the startup script for the app server.
 
-V0.0.7
+## V0.0.7
+
 * Corrected rvm.trust_rvmrc hook.
 
-V0.0.6
+## V0.0.6
+
 * Moved rvm_gemset namespace to rvm.
 * Added a task to trust the application's rvmrc file, hooked after deploy:update_code.

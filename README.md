@@ -1,4 +1,4 @@
-=French Cuisine, Capistrano Recipes
+# French Cuisine, Capistrano Recipes
 
 Capistrano recipes useful for deployment, including:
 
@@ -17,14 +17,14 @@ Capistrano recipes useful for deployment, including:
 *** setups Nginx (generates an appropriate host configuration file),
 *** setups Monit (generates an appropriate configuration file).
 
-==History
+## History
 
 This is just another set of Capistrano Recipes derived from the certainly excellent Weficient's one.
 Wanting to learn how to write Capistrano recipes from scratch, I did not fork nor copy the original
 recipes, rather made my own (starting in a single 'deploy.rb' file) to transform it to a gem to make
 it simpler to use, and to share.
 
-==Included Tasks
+## Included Tasks
 
 TO BE UPDATED
 
@@ -66,16 +66,13 @@ Database:
 * Database servers setup:
 ** cap postgresl:prerequisites
 * Database synchronization:
-These tasks enable you to synchronize your remote database with your local development one (for example).
-(Requires the 'taps' gem to be installed on both workstation and server.)
-** cap db:pull
-** cap db:push
+Ongoing implementation for PostgreSQL and MongoDB using dump/restore commands.
 
 SSH:
 * cap ssh:open_tunnel
 * cap ssh:close_tunnel
 
-==Use cases
+## Use cases
 
 * Changing your application server from :unicorn to :thin:
 ** change the 'app_server' value in your 'deploy.rb' file
@@ -84,7 +81,7 @@ SSH:
 ** run 'cap maintenance:off'
 
 
-==Todo
+## Todo
 
 * If using RVM, should create the gemset if it does not exist, and even install the ruby if it is not
 yet installed.
@@ -95,7 +92,7 @@ by the script, or it may start it itself. It should stop watching when we want t
 * Add tasks for dumping and loading from dump PostgreSQL databases (local and remote). Would be nice way
 to sync production, staging and dev when we work with the same database system.
 
-==Installation
+## Installation
 
 TO BE UPDATED
 
@@ -109,7 +106,7 @@ To setup the initial Capistrano deploy file, go to your Rails app folder via com
 
   capify .
 
-==Configuration
+## Configuration
 
 Inside the newly created config/deploy.rb, add:
 
@@ -118,7 +115,7 @@ Inside the newly created config/deploy.rb, add:
   # This one should go at the end of your deploy.rb
   require 'ricodigo_capistrano_recipes'
 
-===rbenv
+### rbenv
 
 rbenv is not used in place of RVM for ruby management. It's more lightweight, and less
 head-banging-prone when trying to deal with startup scripts or managers (ie. god).
@@ -127,24 +124,15 @@ head-banging-prone when trying to deal with startup scripts or managers (ie. god
 You can disable it by setting ruby_manager to :rvm instead, or to :none if you don't use
 a Ruby manager (which would not be advised by more expert-people-than-me).
 
-===RVM
+NB: RVM is not supported anymore (I don't use it anymore, and I prefer removing obsolete parts that may not work. Please check the repo's history if you need RVM parts.)
 
-RVM is enabled by default. You can disable it by setting :using_rvm to false, or leverage it
-by setting your rvm_ruby_string to appropriate ones (default is ree)
-
-If using_rvm is true, the rvm recipe will load rvm's own capistrano extensions so you don't
-have to worry about it during deploy. Just make sure you have everything set up right, like
-.rvmrc on project root and system-wide install on the servers.
-
-See (http://rvm.beginrescueend.com/rvm/install) for more info.
-
-===Nginx
+### Nginx
 
 If you're using nginx as your web server, set :web_server to :nginx and deploy:setup will
 generate the appropriate configuration file for it based on your other variables, such as
 :application_uses_ssl, etc.
 
-===Unicorn
+### Unicorn
 
 If you're running Unicorn (http://unicorn.bogomips.org/) be sure to add this line instead:
 
