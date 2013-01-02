@@ -1,8 +1,10 @@
 # Overriding deploy:start, deploy:stop, deploy:restart standard Capistrano
 # tasks is a requirement of Capistrano.
 #
-# Code from https://github.com/ricodigo/ricodigo-french_cuisine/blob/master/lib/recipes/deploy.rb
-# Edited by romain@softr.li
+# Author: Romain Champourlier <romain@softr.li>
+#
+# Original inspiration from:
+# https://github.com/ricodigo/ricodigo-french_cuisine/blob/master/lib/recipes/deploy.rb
 
 Capistrano::Configuration.instance.load do
   set :shared_children, %w(public/system log tmp/pids)
@@ -113,5 +115,4 @@ Capistrano::Configuration.instance.load do
       start
     end
   end
-  
 end
