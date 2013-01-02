@@ -16,29 +16,49 @@ def _aset(name, *options)
     default_value = choices = nil
   end
   
-  unless exists?(name)
-    Capistrano::CLI.ui.say("Need a value for '#{name}'. (You can set this value in your deploy.rb file.)")
+  ask_for_value(name, options) unless exists?(name)
+end
+
+def ask_for_value(name, options = {})
+  default = options[:default]
+  choices = options[:choices]
+  prompt = options[:prompt] || "Need a value for '#{name}'"
+
+  Capistrano::CLI.ui.say("#{prompt} (you can set value for '#{name}' if you don't want to be asked anymore)")
     
-    prompt = default_value.nil? ? "Enter value (return will abort): " : "Enter value:"
-    if default_value && choices && choices.any?
-      prompt = "Enter a value (possible choices: #{choices}). Default is:"
-    elsif default_value
-      prompt = "Enter a value. Default is:"
-    elsif choices && choices.any?
-      prompt = "Enter a value (possible choices: #{choices}). No entry will abort."
-    else
-      prompt = "Enter a value. No entry will abort."
-    end
-    
-    value = Capistrano::CLI.ui.ask(prompt) do |q|
-      q.default = default_value unless default_value.nil?
-    end
-    if value.length == 0
-      exit
-    else
-      set(name, value)
-    end 
+  prompt = default.nil? ? "Enter value (return will abort): " : "Enter value:"
+  prompt = (if default and choices and choices.any?
+    "Enter a value (possible choices: #{choices}). Default is:"
+  elsif default
+    "Enter a value. Default is:"
+  elsif choices and choices.any?
+    "Enter a value (possible choices: #{choices}). No entry will abort."
+  else
+    "Enter a value. No entry will abort."
+  end)
+  
+  value = Capistrano::CLI.ui.ask(prompt) do |q|
+    q.default = default unless default.nil?
   end
+  if value.length == 0
+    exit
+  else
+    set(name, value)
+  end 
+end
+
+# ask_for_file :file_name_variable, :with_prompt => "A beautiful prompt?", :unless_exists => 'some_file_path'
+def ask_for_file(name, options = {})
+  if (default = options[:unless_exists]).nil? or !FileTest.exist?(default)
+    ask_for_value(name, options.merge(:prompt => options[:with_prompt]))
+  else
+    set(name, default)
+  end
+end
+
+# ask_for_file_unless_set(:file_name_variable, :with_prompt => "A beautiful prompt?")
+def ask_for_file_unless_set(name, options = {})
+  ask_for_file(name, options) unless exists?(name)
 end
     
 

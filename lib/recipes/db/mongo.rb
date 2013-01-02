@@ -7,10 +7,6 @@ Capistrano::Configuration.instance.load do
         _aset :mongo_db_name
       end
 
-      _cset :local_mongo_dumps_dir, 'fc_pg_dump'
-      unset :local_mongo_dumps_dir unless FileTest.exist?(local_mongo_dumps_dir)
-      _cset :remote_mongo_dump, "/tmp/fc_mongo_dump.bson"
-
       task :drop, :roles => :db do
         deny_in_production
         set_db_credentials
@@ -18,37 +14,36 @@ Capistrano::Configuration.instance.load do
         run "mongo #{mongo_db_name} --eval 'db.dropDatabase()'"
       end
 
-      task :load_from_dump, :roles => :db do
-        deny_in_production
-        set_db_credentials
-
-        _cset :remote_mongo_dump, '/tmp/french_cuisine_deploy_mongo_dump.bson'
-        run "mongorestore -d #{mongo_db_name} #{remote_mongo_dump}"
-      end
-
       task :restore, :roles => :db do
         deny_in_production
         set_db_credentials
 
-        _aset :local_mongo_dumps_dir
-        Dir[File.join(local_mongo_dumps_dir, '*.bson')].each do |local_dump|
-          _cset :remote_mongo_dump, '/tmp/french_cuisine_deploy_mongo_dump.bson'
-          upload local_dump, remote_mongo_dump
-          drop
-          load_from_dump
-          run "rm #{remote_mongo_dump}"
+        ask_for_file_unless_set :local_mongo_dumps_dir, :with_prompt => "Local directory of MongoDB dumps?"
+        local_mongo_dumps_archive = "#{local_mongo_dumps_dir}.tar.gz"
+        remote_mongo_dumps_archive = "/tmp/french_cuisine_mongo_dumps.tar.gz"
+
+        local_mongo_dumps_dir_name = local_mongo_dumps_dir.split('/').last
+        run_locally "cd #{local_mongo_dumps_dir}/..; tar zcf #{local_mongo_dumps_archive} #{local_mongo_dumps_dir_name}"
+        upload local_mongo_dumps_archive, remote_mongo_dumps_archive
+
+        drop
+
+        run "tar zxf #{remote_mongo_dumps_archive} -C /tmp"
+        Dir[File.join(local_mongo_dumps_dir, '*.bson')].each do |dump_file|
+          dump_file_name = File.basename(dump_file)
+          run "mongorestore -d #{mongo_db_name} /tmp/#{local_mongo_dumps_dir_name}/#{dump_file_name}"
         end
+
+        run "rm #{remote_mongo_dumps_archive}"
+        run "rm -Rf /tmp/#{local_mongo_dumps_dir_name}"
+        run_locally "rm #{local_mongo_dumps_archive}"
       end
 
       task :push, :roles => :db, :on_error => :continue do
         deny_in_production
 
-        set :local_mongo_dumps_dir, 'french_cuisine_deploy_mongo_dumps'
-        unset :local_mongo_dumps_dir unless FileTest.exist?(local_mongo_dumps_dir)
-        _aset :local_mongo_dumps_dir
-
+        ask_for_file "Local directory of MongoDB dumps?", :local_mongo_dumps_dir, :unless_exists => 'french_cuisine_deploy_mongo_dumps'
         ask "Are you sure? This will replace your #{stage} MongoDB by the BSON dumps in #{local_mongo_dumps_dir} (yes/no)", false
-        
         restore
       end
     end
