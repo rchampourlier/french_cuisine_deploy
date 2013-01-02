@@ -37,6 +37,18 @@ Capistrano::Configuration.instance.load do
         abort if merged_branch == 'abort'
         run_locally "git merge #{merged_branch}" unless merged_branch == 'none'
       
+        # Ask for assets precompiling
+        message = "Should assets be precompiled (through rake assets:precompile)? If yes, it will then commit and push to origin (yn). Empty answer will abort."
+        precompile = Capistrano::CLI.ui.ask(message)
+        abort if (precompile.downcase =~ %r%[yn]%).nil?
+
+        if precompile.downcase == 'y'
+          # Precompiling and committing assets
+          run_locally "bundle exec rake assets:precompile"
+          run_locally "git add public/assets"
+          run_locally "git commit -m 'Precompiled assets for deployment'"
+        end
+      
       elsif stage == :production
         message = "Continue? This will merge the 'staging' branch and push to 'origin'. (Yn)"
         continue = Capistrano::CLI.ui.ask(message) do |q|
