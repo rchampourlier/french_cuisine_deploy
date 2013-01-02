@@ -24,7 +24,7 @@ Capistrano::Configuration.instance.load do
     end
 
     desc "Stop the delayed_job process"
-    task :stop, :roles => lambda { roles } do
+    task :stop, :roles => lambda { roles }, :on_error => :continue do
       run "cd #{current_path};#{rails_env} bundle exec script/delayed_job -n #{background_workers} stop"
     end
 

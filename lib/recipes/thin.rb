@@ -40,7 +40,7 @@ Capistrano::Configuration.instance.load do
     end
 
     desc "Stops thin directly"
-    task :stop, :roles => :app do
+    task :stop, :roles => :app, :on_error => :continue do
      run "cd #{current_path} && bundle exec #{thin_binary} -C #{thin_config} stop"
     end
 
