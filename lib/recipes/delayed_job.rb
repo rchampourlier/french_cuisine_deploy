@@ -25,19 +25,18 @@ Capistrano::Configuration.instance.load do
 
     desc "Stop the delayed_job process"
     task :stop, :roles => lambda { roles } do
-      #run "cd #{current_path};#{rails_env} bundle exec script/delayed_job -n #{background_workers} stop"
-      run "cd #{current_path};#{rails_env} bundle exec script/delayed_job -n #{background_workers} --pid-dir=#{pids_path} stop"
+      run "cd #{current_path};#{rails_env} bundle exec script/delayed_job -n #{background_workers} stop"
     end
 
     desc "Start the delayed_job process"
     task :start, :roles => lambda { roles } do
-      run "cd #{current_path};#{rails_env} bundle exec script/delayed_job -n #{background_workers} --pid-dir=#{pids_path} start #{args}"
-      #run "cd #{current_path};#{rails_env} bundle exec script/delayed_job -n #{background_workers} start"
+      run "cd #{current_path};#{rails_env} bundle exec script/delayed_job -n #{background_workers} start #{args}"
     end
 
     desc "Restart the delayed_job process"
     task :restart, :roles => lambda { roles } do
-      run "cd #{current_path};#{rails_env} bundle exec script/delayed_job -n #{background_workers} --pid-dir=#{pids_path} restart #{args}"
+      stop
+      start
     end
 
     task :setup, :roles => :app , :except => { :no_release => true } do
@@ -51,7 +50,5 @@ Capistrano::Configuration.instance.load do
     task :clean_setup, :roles => :app , :except => { :no_release => true } do
       # Nothing to do, wasn't setup
     end
-  
   end
-
 end
