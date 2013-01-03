@@ -55,9 +55,9 @@ Capistrano::Configuration.instance.load do
     up the thin.
     EOF
     task :setup, :roles => :app , :except => { :no_release => true } do
-      unless process_monitor_manages_app_server
-        generate_config(thin_conf_template, thin_config)
+      generate_config(thin_conf_template, thin_config)
 
+      unless process_monitor_manages_app_server
         # Generate the startup script and move it to the init.d dir (or any other directory specified
         # by :startup_script_prefix). Also set the correct rights.
         generate_config(thin_startup_script_template, "#{shared_path}/#{thin_startup_script_name}")
@@ -68,7 +68,7 @@ Capistrano::Configuration.instance.load do
         # Position the script for loading at server's boot.
         sudo "update-rc.d #{thin_startup_script_name} start #{thin_startorder} #{thin_runlevels} . stop #{thin_killorder} #{thin_stoplevels} ."
       end
-    end # task :setup
+    end
     
     
     desc <<-EOF
