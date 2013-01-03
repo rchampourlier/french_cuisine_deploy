@@ -174,8 +174,8 @@ def expanded_path_for(path)
 end
 
 def parse_config(file)
-  require 'erb'  #render not available in Capistrano 2
-  template=File.read(file)          # read it
+  require 'erb'                              # render not available in Capistrano 2
+  template=File.read(file)                   # read it
   return ERB.new(template).result(binding)   # parse it
 end
 
