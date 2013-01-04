@@ -34,7 +34,7 @@ CMD = "bundle exec script/delayed_job"
     w.uid = '<%= user %>'
     w.gid = '<%= group %>'
  
-    w.start = "#{CMD} start -i #{index}"
+    w.start = "#{CMD} start -i #{index} -e #{rails_env}"
     w.start_grace = 30.seconds 
     w.restart_grace = 30.seconds 
 
