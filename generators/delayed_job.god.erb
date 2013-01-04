@@ -10,38 +10,33 @@
 # REFERENCES
 #   - Useful documentation on script/delayed_job:
 #     https://github.com/collectiveidea/delayed_job/wiki/Delayed-job-command-details
-#
-# CONVENTIONS
-#
-# `pids_path` must be set to tell God where the PID files can be found.
-# The PID file is expected to follow this convention:
-#   <pids_path>/delayed_job.<index>.pid
-#
+
 CURRENT_DIR = "<%= current_path %>"
 SHARED_DIR = "<%= shared_path %>"
 LOG_DIR = "<%= log_path %>"
 PIDS_DIR = "<%= pids_path %>"
-CMD = "bundle exec script/delayed_job"
+CMD_PREFIX = "PATH=/home/deployer/.rbenv/shims:/home/deployer/.rbenv/bin:$PATH"
+CMD = "cd #{CURRENT_DIR}; /usr/bin/env RAILS_ENV=<%= stage %> #{CURRENT_DIR}/script/delayed_job"
 
-<%= background_workers %>.times do |index|
+<%= background_workers %>.times do |num|
 
   God.watch do |w|
     w.dir = "<%= current_path %>"
 
     w.group = "<%= application %>"
-    w.name = w.group + "-delayed-job-#{index}"
+    w.name = w.group + "-delayed-job-#{num}"
     
     w.uid = '<%= user %>'
     w.gid = '<%= group %>'
  
-    w.start = "#{CMD} start -i #{index} -e #{rails_env}"
+    w.start = "#{CMD} -i #{num} --pid-dir=#{PIDS_DIR} start" 
     w.start_grace = 30.seconds 
     w.restart_grace = 30.seconds 
 
     w.stop = "#{CMD} stop" 
     
-    w.log = "#{LOG_DIR}/god_delayed_job.#{index}.log" 
-    w.pid_file = "#{PIDS_DIR}/delayed_job.#{index}.pid"
+    w.log = "#{LOG_DIR}/god_delayed_job.#{num}.log" 
+    w.pid_file = "#{PIDS_DIR}/delayed_job.#{num}.pid"
 
     w.interval = 15.seconds 
     w.behavior(:clean_pid_file) 

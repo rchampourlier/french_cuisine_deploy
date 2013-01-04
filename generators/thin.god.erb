@@ -46,7 +46,7 @@ num_servers = config["servers"] ||= 1
     pid_path = config["pid"]
     ext = File.extname(pid_path)
 
-    w.log = "#{LOG_DIR}/god_thin.#{index}.log" 
+    w.log = "#{LOG_DIR}/god_thin.#{number}.log" 
     w.pid_file = pid_path.gsub(/#{ext}$/, ".#{number}#{ext}")
   
     w.behavior(:clean_pid_file)
