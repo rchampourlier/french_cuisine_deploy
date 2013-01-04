@@ -13,14 +13,15 @@
 require 'yaml'
 
 file = "<%= thin_config %>"
+LOG_DIR = "<%= log_path %>"
 
 config = YAML.load_file(file)
 num_servers = config["servers"] ||= 1
 
-(0...num_servers).each do |i|
+(0...num_servers).each do |index|
   # UNIX socket cluster use number 0 to 2 (for 3 servers)
   # and tcp cluster use port number 3000 to 3002.
-  number = config['socket'] ? i : (config['port'] + i)
+  number = config['socket'] ? index : (config['port'] + index)
 
   God.watch do |w|
     w.dir = "<%= current_path %>"
@@ -45,6 +46,7 @@ num_servers = config["servers"] ||= 1
     pid_path = config["pid"]
     ext = File.extname(pid_path)
 
+    w.log = "#{LOG_DIR}/god_thin.#{index}.log" 
     w.pid_file = pid_path.gsub(/#{ext}$/, ".#{number}#{ext}")
   
     w.behavior(:clean_pid_file)

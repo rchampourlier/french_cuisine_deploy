@@ -49,7 +49,6 @@ Capistrano::Configuration.instance.load do
     Setup god monitoring for app server thin
     EOF
     task :setup_app_server_thin, :roles => :app do
-      # Generates the conf file
       generate_config(god_thin_template, god_thin_conf_file)
       
       # Symlinks it to god's confs dir
@@ -61,11 +60,9 @@ Capistrano::Configuration.instance.load do
     Clean setup god monitoring for app server thin
     EOF
     task :clean_setup_app_server_thin, :roles => :app do
-      # Unsymlink the conf file
       run "unlink #{god_thin_conf_symlink}; true"
       # forcing continue, even if unlink fails (generally because no link)
 
-      # Removed the conf file
       run "rm -f #{god_thin_conf_file}"
     end
     
@@ -73,8 +70,8 @@ Capistrano::Configuration.instance.load do
     Setup god monitoring for background processor delayed_job
     EOF
     task :setup_background_processor_delayed_job, :roles => :app do
-      # Generates the conf file
       generate_config(god_delayed_job_template, god_delayed_job_conf_file)
+
       # Symlinks it to god's confs dir
       run "unlink #{god_delayed_job_conf_symlink}; true"
       run "ln -s #{god_delayed_job_conf_file} #{god_delayed_job_conf_symlink}"
@@ -84,11 +81,9 @@ Capistrano::Configuration.instance.load do
     Clean setup god monitoring for background processor delayed_job
     EOF
     task :clean_setup_background_processor_delayed_job, :roles => :app do
-      # Unsymlink the conf file
       run "unlink #{god_delayed_job_conf_symlink}; true"
       # forcing continue, even if unlink fails (generally because no link)
       
-      # Removed the conf file
       run "rm -f #{god_delayed_job_conf_file}"
     end
   end
@@ -100,5 +95,4 @@ Capistrano::Configuration.instance.load do
     after 'thin:setup',             "god:setup_app_server_thin"
     after 'delayed_job:setup',      "god:setup_background_processor_delayed_job"
   end
-  
 end
