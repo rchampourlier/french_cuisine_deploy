@@ -1,6 +1,6 @@
 Capistrano::Configuration.instance.load do
 
-  _cset :god_dir,           "/home/deployer/God"
+  _cset :god_dir,           "/home/#{user}/god"
   _cset :god_confs_prefix,  "#{god_dir}/conf"
   _cset :god_master_conf,   "#{god_dir}/main.god"
   
@@ -19,11 +19,11 @@ Capistrano::Configuration.instance.load do
   namespace :god do
     
     task :start_monitoring, :roles => :app do
-      rbenv_sudo "god monitor #{application}"
+      super_sudo "god monitor #{application}"
     end
     
     task :stop_monitoring, :roles => :app do
-      rbenv_sudo "god unmonitor #{application}"
+      super_sudo "god unmonitor #{application}"
     end
     
     task :restart_monitoring, :roles => :app do
@@ -33,7 +33,7 @@ Capistrano::Configuration.instance.load do
     
     task :reload, :roles => :app do
       stop_monitoring
-      rbenv_sudo "god load #{god_master_conf}"
+      super_sudo "god load #{god_master_conf}"
       start_monitoring if is_using_god 
     end
     

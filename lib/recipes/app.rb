@@ -56,16 +56,7 @@ Capistrano::Configuration.instance.load do
     ssh_options[:forward_agent] = true
   end
 
-  # RVM settings
   _cset :ruby_manager, :rbenv
-
-  if is_using_rvm
-    $:.unshift(File.expand_path('./lib', ENV['rvm_path']))  # Add RVM's lib directory to the load path.
-    require "rvm/capistrano"                                # Load RVM's capistrano plugin.
-
-    # Sets the rvm to a specific version (or whatever env you want it to run in)
-    _aset :rvm_ruby_string
-  end
 
   # Options necessary to make Ubuntu’s SSH happy
   ssh_options[:paranoid]    = false
@@ -88,26 +79,30 @@ Capistrano::Configuration.instance.load do
       end
     end
     
-    task :web_server_setup, :roles => :app do
+    task :setup_web_server, :roles => :app do
       eval "#{web_server}.setup"
       eval "#{web_server}.reload"
     end
     
-    task :clean_web_server_setup, :roles => :app do
+    task :clean_setup_web_server, :roles => :app do
       eval "#{web_server}.clean_setup"
       eval "#{web_server}.reload"
     end
     
-    task :reset_web_server_setup, :roles => :app do
+    task :reset_setup_web_server, :roles => :app do
+      clean_setup_web_server
+      setup_web_server
     end
     
     task :setup, :roles => :app do
+      setup_web_server
       eval "#{app_server}.setup"
       eval "#{background_processor}.setup" if is_using_background_processor
       eval "#{process_monitor}.setup" if is_using_process_monitor
     end
     
     task :clean_setup, :roles => :app do
+      clean_setup_web_server
       eval "#{app_server}.clean_setup"
       eval "#{background_processor}.clean_setup" if is_using_background_processor
       eval "#{process_monitor}.clean_setup" if is_using_process_monitor

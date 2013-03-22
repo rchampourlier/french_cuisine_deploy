@@ -63,9 +63,7 @@ set :host_confs_prefix, "/etc/nginx"                                            
 # RAILS ENVIRONMENT
 
 set :rails_env,         'production'                                                # default: 'production'
-
 set :ruby_manager,      :rbenv        # possible values: :rvm or :rbenv             # default: :rbenv
-set :rvm_ruby_string,   "ruby-1.9.2-p290@#{application}" if is_using_rvm            # required if using rvm
 
 
 # APP SERVER CONFIGURATION

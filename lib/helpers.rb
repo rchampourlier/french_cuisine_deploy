@@ -97,10 +97,6 @@ def is_using_git
   is_using('git', :scm)
 end
 
-def is_using_rvm
-  is_using('rvm', :ruby_manager)
-end
-
 def is_using_rbenv
   is_using('rbenv', :ruby_manager)
 end
@@ -205,13 +201,17 @@ def run_rake(task)
   run "cd #{current_path} && rake #{task} RAILS_ENV=#{environment}"
 end
 
-def rvmsudo(task)
-  run "cd #{current_path} && rvmsudo #{task}"
-end
-
 def deny_in_production
   if stage == "production"
     puts "Can't push to production"
     abort
+  end
+end
+
+def super_sudo(command)
+  if is_using_rbenv
+    sudo "#{rbenv_shims_path}/#{command}"
+  else
+    sudo command
   end
 end

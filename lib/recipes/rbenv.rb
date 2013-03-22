@@ -6,19 +6,21 @@ Capistrano::Configuration.instance.load do
   # --shebang ruby-local-exec option makes sure we'll use the ruby version defined in the
   # .rbenv-version in the app root. Note that he --shebang flag requires Bundler 1.1.
 
-  # This is a hack which runs a uselss command in a sudo to make Capistrano
-  # request the password. Since sudo retains the password for some time, thus
-  # allowing to run rbenv sudo without needing to enter the password again.
-  def rbenv_sudo command
-    sudo "echo"
-    run "rbenv sudo #{command}"
-  end
-  
   if is_using_rbenv
     set :bundle_flags, "--deployment --quiet --binstubs --shebang ruby-local-exec"
-    set :default_environment, {
-      'PATH' => "/home/deployer/.rbenv/shims:/home/deployer/.rbenv/bin:$PATH"
-    }
+
+    case fetch(:rbenv_install)
+    when :user
+      _cset :rbenv_shims_path, "/home/#{user}/.rbenv/shims"
+      _cset :rbenv_bin_path, "/home/#{user}/.rbenv/bin"
+    else # :system or else
+      _cset :rbenv_shims_path, '/opt/rbenv/shims'
+      _cset :rbenv_bin_path, '/opt/rbenv/bin'
+    end
+    set :rbenv_path, "#{rbenv_shims_path}:#{rbenv_bin_path}"
+
+    existing_environment = fetch(:default_environment) || {}
+    existing_path = existing_environment['PATH'] || '$PATH'
+    set :default_environment, existing_environment.merge('PATH' => "#{rbenv_path}:#{existing_path}")
   end
-  
 end

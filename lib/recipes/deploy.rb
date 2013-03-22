@@ -50,24 +50,11 @@ Capistrano::Configuration.instance.load do
       run_locally "git push origin"
     end
     
-    desc "|french_cuisine| Interactive walkthrough for complete first deployment"
+    desc "|french_cuisine| First deployment: setup, then deploy:cold"
     task :first do
-      
-      deploy.prerequisites
-      answer = Capistrano::CLI.ui.ask("Continue? (yes/no)") do |q|
-        q.default = "yes"
-        q.validate = %r%(yes|no)%
-      end
-      abort unless answer == "yes" 
-      
+      app.setup
       deploy.setup
       deploy.cold
-    end
-    
-    desc "|french_cuisine| Displays application deployment prerequisites"
-    task :prerequisites do
-      rvm.prerequisites
-      eval "#{database}.prerequisites"
     end
     
     desc "|french_cuisine| Destroys everything"
